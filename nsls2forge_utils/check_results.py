@@ -1,8 +1,6 @@
 import importlib
 import logging
 import subprocess
-# import os
-import sys
 from distutils.version import LooseVersion
 from subprocess import PIPE
 

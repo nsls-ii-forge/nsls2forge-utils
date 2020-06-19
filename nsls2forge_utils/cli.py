@@ -1,4 +1,5 @@
 import argparse
+import sys
 
 from .check_results import check_conda_channels, check_package_version
 
