@@ -68,11 +68,12 @@ def get_all_feedstocks(organization, cached=False):
             names = f.read().split()
         return names
 
-    names = get_all_feedstocks_from_github()
+    names = get_all_feedstocks_from_github(organization)
     return names
 
 
 def main(args=None):
+    organization = 'nsls-ii-forge'
     # see if json exists for active feedstocks
     try:
         logger.info("fetching active feedstocks from admin-migrations")
@@ -89,7 +90,7 @@ def main(args=None):
     except Exception as e:
         logger.critical("admin-migrations all feedstocks failed: %s", repr(e))
         logger.critical("defaulting to the local version")
-        names = get_all_feedstocks(cached=False)
+        names = get_all_feedstocks(organization, cached=False)
         with open("names_are_active.flag", "w") as fp:
             fp.write("no")
 
