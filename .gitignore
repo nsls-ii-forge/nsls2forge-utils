@@ -80,3 +80,12 @@ target/
 
 #Ipython Notebook
 .ipynb_checkpoints
+
+node_attrs/*
+graph.json
+pr_json/*
+pr_status/*
+status/*
+feedstocks/*
+coverage.xml
+.coverage.*
