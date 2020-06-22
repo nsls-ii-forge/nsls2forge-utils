@@ -8,8 +8,21 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def get_all_feedstocks_from_github() -> List[str]:
-    org = github3.organization('nsls-ii-forge')
+def get_all_feedstocks_from_github(organization):
+    '''
+    Gets all public feedstock repository names from the nsls-ii-forge organization.
+    
+    Parameters
+    ----------
+    organization : str
+        Name of organization on GitHub.
+
+    Returns
+    -------
+    names : List
+        List of repository names that end with '-feedstock' (stripped).
+    '''
+    org = github3.organization(organization)
     repos = org.repositories()
     names = []
     try:
@@ -33,7 +46,22 @@ def get_all_feedstocks_from_github() -> List[str]:
     return names
 
 
-def get_all_feedstocks(cached: bool = False) -> List[str]:
+def get_all_feedstocks(organization, cached=False):
+    '''
+    Gets all feedstocks either from GitHub or from names.txt if flag is specified.
+
+    Parameters
+    ----------
+    organization : str
+        Name of organization on GitHub.
+    cached : bool
+        Specified if client wants to take repository names from names.txt.
+
+    Returns
+    -------
+    names : List
+        List of repository names that end with '-feedstock' (stripped).
+    '''
     if cached:
         logger.info("reading names")
         with open("names.txt", "r") as f:
@@ -44,7 +72,8 @@ def get_all_feedstocks(cached: bool = False) -> List[str]:
     return names
 
 
-def main(args: Any = None) -> None:
+def main(args=None):
+    # see if json exists for active feedstocks
     try:
         logger.info("fetching active feedstocks from admin-migrations")
         r = requests.get(
@@ -64,6 +93,7 @@ def main(args: Any = None) -> None:
         with open("names_are_active.flag", "w") as fp:
             fp.write("no")
 
+    # write each repository name to a file
     with open("names.txt", "w") as f:
         for name in names:
             f.write(name)
