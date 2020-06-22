@@ -1,10 +1,9 @@
-import datetime
-
 import requests
 import github3
 import logging
 
 logger = logging.getLogger(__name__)
+
 
 def get_all_feedstocks_from_github(organization):
     '''
@@ -35,10 +34,7 @@ def get_all_feedstocks_from_github(organization):
         msg = ["Github rate limited. "]
         c = org.ratelimit_remaining()
         if c == 0:
-            msg.append("API timeout, API returns at")
-            msg.append(
-                datetime.datetime.utcfromtimestamp(ts).strftime("%Y-%m-%dT%H:%M:%SZ"),
-            )
+            msg.append("API timeout.")
         logger.warning(" ".join(msg))
         raise
     return names
