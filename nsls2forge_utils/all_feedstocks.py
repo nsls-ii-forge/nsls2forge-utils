@@ -1,6 +1,4 @@
 import datetime
-import os
-from typing import Any, List
 
 import requests
 import github3
@@ -11,7 +9,8 @@ logger = logging.getLogger(__name__)
 def get_all_feedstocks_from_github(organization):
     '''
     Gets all public feedstock repository names from the nsls-ii-forge organization.
-    
+
+
     Parameters
     ----------
     organization : str
@@ -34,9 +33,8 @@ def get_all_feedstocks_from_github(organization):
                 names.append(name)
     except github3.GitHubError:
         msg = ["Github rate limited. "]
-        c = gh.rate_limit()["resources"]["core"]
-        if c["remaining"] == 0:
-            ts = c["reset"]
+        c = org.ratelimit_remaining()
+        if c == 0:
             msg.append("API timeout, API returns at")
             msg.append(
                 datetime.datetime.utcfromtimestamp(ts).strftime("%Y-%m-%dT%H:%M:%SZ"),
