@@ -1,2 +1,2 @@
 # List required packages in this file, one per line.
-github3
+github3.py
