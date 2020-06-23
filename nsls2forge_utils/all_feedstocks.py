@@ -21,7 +21,7 @@ def get_all_feedstocks_from_github(organization, username='', password=''):
     organization: str
         Name of organization on GitHub.
     username: str, optional
-        Name of user on GitHub for authentication. 
+        Name of user on GitHub for authentication.
         Uses environment variables if not specified.
     password: str, optional
         Password of user on GitHub for authentication.
@@ -69,7 +69,7 @@ def get_all_feedstocks(organization, username='', password='', cached=False):
     organization: str
         Name of organization on GitHub.
     username: str, optional
-        Name of user on GitHub for authentication. 
+        Name of user on GitHub for authentication.
         Uses environment variable if not specified.
     password: str, optional
         Password of user on GitHub for authentication.
