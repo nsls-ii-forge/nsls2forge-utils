@@ -11,7 +11,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def get_all_feedstocks_from_github(organization, username='', password=''):
+def get_all_feedstocks_from_github(organization, **kwargs):
     '''
     Gets all public feedstock repository names from the GitHub organization
     (e.g. nsls-ii-forge).
@@ -32,10 +32,15 @@ def get_all_feedstocks_from_github(organization, username='', password=''):
     names: list
         List of repository names that end with '-feedstock' (stripped).
     '''
-    if username == '':
-        gh = github3.login(os.environ['USERNAME'], os.environ['PASSWORD'])
+    if 'username' not in kwargs:
+        username = os.environ['USERNAME']
     else:
-        gh = github3.login(username, password)
+        username = kwargs['username']
+    if 'password' not in kwargs:
+        password = os.environ['PASSWORD']
+    else:
+        password = kwargs['password']
+    gh = github3.login(username, password)
     org = gh.organization(organization)
     repos = org.repositories()
     names = []
@@ -60,7 +65,7 @@ def get_all_feedstocks_from_github(organization, username='', password=''):
     return names
 
 
-def get_all_feedstocks(organization, username='', password='', cached=False):
+def get_all_feedstocks(organization, username=None, password=None, cached=False):
     '''
     Gets all feedstocks either from GitHub or from names.txt if flag is specified.
 
@@ -91,7 +96,7 @@ def get_all_feedstocks(organization, username='', password='', cached=False):
     if organization == '':
         logger.info("No GitHub organization specified.")
         return None
-    names = get_all_feedstocks_from_github(organization, username, password)
+    names = get_all_feedstocks_from_github(organization, username=username, password=password)
     return names
 
 
@@ -101,8 +106,7 @@ def main(args=None):
     # write each repository name to a file
     with open("names.txt", "w") as f:
         for name in names:
-            f.write(name)
-            f.write("\n")
+            f.write(f'{name}\n')
 
 
 if __name__ == "__main__":
