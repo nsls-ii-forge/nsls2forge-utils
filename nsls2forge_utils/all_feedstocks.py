@@ -3,7 +3,6 @@ This code is a rework of
 https://github.com/regro/cf-scripts/blob/master/conda_forge_tick/all_feedstocks.py
 for use by nsls-ii-forge's own auto-tick bot.
 '''
-import requests
 import github3
 import logging
 
@@ -76,26 +75,7 @@ def get_all_feedstocks(organization, cached=False):
 
 def main(args=None):
     organization = 'nsls-ii-forge'
-    # see if json exists for active feedstocks
-    try:
-        logger.info("fetching active feedstocks from admin-migrations")
-        r = requests.get(
-            "https://raw.githubusercontent.com/nsls-ii-forge/admin-migrations/"
-            "master/data/all_feedstocks.json"
-        )
-        if r.status_code != 200:
-            r.raise_for_status()
-
-        names = r.json()["active"]
-        with open("names_are_active.flag", "w") as fp:
-            fp.write("yes")
-    except Exception as e:
-        logger.critical("admin-migrations all feedstocks failed: %s", repr(e))
-        logger.critical("defaulting to the local version")
-        names = get_all_feedstocks(organization, cached=False)
-        with open("names_are_active.flag", "w") as fp:
-            fp.write("no")
-
+    names = get_all_feedstocks(organization, cached=False)
     # write each repository name to a file
     with open("names.txt", "w") as f:
         for name in names:
