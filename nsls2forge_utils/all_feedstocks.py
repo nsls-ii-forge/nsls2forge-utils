@@ -4,12 +4,14 @@ https://github.com/regro/cf-scripts/blob/master/conda_forge_tick/all_feedstocks.
 for use by nsls-ii-forge's own auto-tick bot.
 '''
 import github3
+import os
+import datetime
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-def get_all_feedstocks_from_github(organization):
+def get_all_feedstocks_from_github(organization, username='', password=''):
     '''
     Gets all public feedstock repository names from the GitHub organization
     (e.g. nsls-ii-forge).
@@ -18,13 +20,23 @@ def get_all_feedstocks_from_github(organization):
     ----------
     organization: str
         Name of organization on GitHub.
+    username: str, optional
+        Name of user on GitHub for authentication. 
+        Uses environment variables if not specified.
+    password: str, optional
+        Password of user on GitHub for authentication.
+        Uses environment variables if not specified.
 
     Returns
     -------
     names: list
         List of repository names that end with '-feedstock' (stripped).
     '''
-    org = github3.organization(organization)
+    if username == '':
+        gh = github3.login(os.environ['USERNAME'], os.environ['PASSWORD'])
+    else:
+        gh = github3.login(username, password)
+    org = gh.organization(organization)
     repos = org.repositories()
     names = []
     try:
@@ -36,15 +48,19 @@ def get_all_feedstocks_from_github(organization):
                 names.append(name)
     except github3.GitHubError:
         msg = ["Github rate limited. "]
-        c = org.ratelimit_remaining()
-        if c == 0:
-            msg.append("API timeout.")
+        c = gh.rate_limit()["resources"]["core"]
+        if c["remaining"] == 0:
+            ts = c["reset"]
+            msg.append("API timeout, API returns at")
+            msg.append(
+                datetime.datetime.utcfromtimestamp(ts).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            )
         logger.warning(" ".join(msg))
         raise
     return names
 
 
-def get_all_feedstocks(organization, cached=False):
+def get_all_feedstocks(organization, username='', password='', cached=False):
     '''
     Gets all feedstocks either from GitHub or from names.txt if flag is specified.
 
@@ -52,6 +68,12 @@ def get_all_feedstocks(organization, cached=False):
     ----------
     organization: str
         Name of organization on GitHub.
+    username: str, optional
+        Name of user on GitHub for authentication. 
+        Uses environment variable if not specified.
+    password: str, optional
+        Password of user on GitHub for authentication.
+        Uses environment variable if username not specified.
     cached: bool, optional
         Specified if client wants to take repository names from names.txt.
 
@@ -69,7 +91,7 @@ def get_all_feedstocks(organization, cached=False):
     if organization == '':
         logger.info("No GitHub organization specified.")
         return None
-    names = get_all_feedstocks_from_github(organization)
+    names = get_all_feedstocks_from_github(organization, username, password)
     return names
 
 
