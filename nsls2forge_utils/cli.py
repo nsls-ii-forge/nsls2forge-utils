@@ -90,4 +90,5 @@ def all_feedstocks():
                                username=args.username,
                                token=args.token)
     names = sorted(names)
-    _write_list_to_file(names, args.filepath)
+    if not args.cached:
+        _write_list_to_file(names, args.filepath)
