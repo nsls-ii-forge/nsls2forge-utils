@@ -63,7 +63,7 @@ def all_feedstocks():
 
     # Set cached to true
     parser.add_argument('-c', '--cached', dest='cached',
-                        default=False, type=bool,
+                        action='store_true',
                         help=('read the names of feedstocks from the cache'))
 
     # Give GitHub organization name
