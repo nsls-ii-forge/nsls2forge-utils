@@ -9,6 +9,8 @@ import netrc
 
 import github3
 
+from nsls2forge_utils.io import _write_list_to_file, read_file_to_list
+
 logger = logging.getLogger(__name__)
 
 
@@ -49,7 +51,7 @@ def get_all_feedstocks_from_github(organization=None, username=None, token=None)
             name = repo.name
             if name.endswith("-feedstock"):
                 name = name.split("-feedstock")[0]
-                logger.info(name)
+                logger.info(f'Found feedstock: {name}')
                 names.append(name)
     except github3.GitHubError:
         msg = ["Github rate limited. "]
@@ -84,10 +86,8 @@ def get_all_feedstocks(cached=False, **kwargs):
         None if no organization or username is specified and cached = False.
     '''
     if cached:
-        logger.info("reading names")
-        with open("names.txt", "r") as f:
-            names = f.read().split()
-        return names
+        logger.info("Reading names from cache (names.txt)")
+        return read_file_to_list('names.txt')
     names = get_all_feedstocks_from_github(**kwargs)
     return names
 
@@ -96,10 +96,10 @@ def main(args=None):
     # TODO: move organization to global CONFIG file
     organization = 'nsls-ii-forge'
     names = get_all_feedstocks(cached=False, organization=organization)
+    # sort names
+    names = sorted(names)
     # write each repository name to a file
-    with open("names.txt", "w") as f:
-        for name in names:
-            f.write(f'{name}\n')
+    _write_list_to_file(names, 'names.txt')
 
 
 if __name__ == "__main__":

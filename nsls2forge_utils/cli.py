@@ -1,10 +1,11 @@
 import argparse
-import sys
 
 from .check_results import check_conda_channels, check_package_version
+from .all_feedstocks import get_all_feedstocks
+from .io import _write_list_to_file
 
 
-def main():
+def check_results():
     parser = argparse.ArgumentParser(
         description='Check various parameters of a generated conda package.')
 
@@ -49,5 +50,44 @@ def main():
         check_package_version(**version_kwargs)
 
 
-if __name__ == '__main__':
-    sys.exit(main())
+def all_feedstocks():
+    parser = argparse.ArgumentParser(
+        description='Retrieve all feedstock repositories from cache or GitHub '
+                    'and write to file.')
+
+    # Set file path
+    parser.add_argument('-f', '--filepath', dest='filepath',
+                        default='names.txt', type=str,
+                        help=('filepath to write feedstock names to '
+                              '(default is names.txt)'))
+
+    # Set cached to true
+    parser.add_argument('-c', '--cached', dest='cached',
+                        default=False, type=bool,
+                        help=('read the names of feedstocks from the cache'))
+
+    # Give GitHub organization name
+    parser.add_argument('-o', '--organization', dest='organization',
+                        default=None, type=str,
+                        help=('GitHub organization to get feedstocks from '
+                              '(must be specified if not cached)'))
+
+    # Give GitHub username and token
+    parser.add_argument('-u', '--username', dest='username',
+                        default=None, type=str,
+                        help=('GitHub username for authentication'))
+    parser.add_argument('-t', '--token', dest='token',
+                        default=None, type=str,
+                        help=('GitHub token for authentication'))
+
+    args = parser.parse_args()
+
+    if not args.cached and args.organization is None:
+        parser.print_help()
+
+    names = get_all_feedstocks(cached=args.cached,
+                               organization=args.organization,
+                               username=args.username,
+                               token=args.token)
+    names = sorted(names)
+    _write_list_to_file(names, args.filepath)
