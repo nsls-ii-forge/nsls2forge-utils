@@ -23,10 +23,10 @@ def get_all_feedstocks_from_github(organization=None, username=None, token=None)
         Name of organization on GitHub.
     username: str, optional
         Name of user on GitHub for authentication.
-        Uses environment variables if not specified.
+        Uses value from ~/.netrc if not specified.
     password: str, optional
         Password of user on GitHub for authentication.
-        Uses environment variables if not specified.
+        Uses value from ~/.netrc if not specified.
 
     Returns
     -------
