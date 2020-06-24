@@ -12,7 +12,7 @@ import github3
 logger = logging.getLogger(__name__)
 
 
-def get_all_feedstocks_from_github(organization, username=None, token=None):
+def get_all_feedstocks_from_github(organization=None, username=None, token=None):
     '''
     Gets all public feedstock repository names from the GitHub organization
     (e.g. nsls-ii-forge).
@@ -30,9 +30,13 @@ def get_all_feedstocks_from_github(organization, username=None, token=None):
 
     Returns
     -------
-    names: list
+    names: list, None
         List of repository names that end with '-feedstock' (stripped).
+        None if no organization is specified.
     '''
+    if organization is None:
+        logger.critical('No GitHub organization sepcified.')
+        return None
     if username is None:
         netrc_file = netrc.netrc()
         username, _, token = netrc_file.hosts['github.com']
@@ -61,18 +65,17 @@ def get_all_feedstocks_from_github(organization, username=None, token=None):
     return names
 
 
-def get_all_feedstocks(organization=None, cached=False, **kwargs):
+def get_all_feedstocks(cached=False, **kwargs):
     '''
     Gets all feedstocks either from GitHub or from names.txt if flag is specified.
 
     Parameters
     ----------
-    organization: str, optional
-        Name of organization on GitHub. Optional only if cached = True.
     cached: bool, optional
         Specified if client wants to take repository names from names.txt.
     kwargs: dict, optional
-        Username and token may be specified here for authentication.
+        Organization, username and token should be specified here for authentication
+        if cached = False.
 
     Returns
     -------
@@ -85,23 +88,14 @@ def get_all_feedstocks(organization=None, cached=False, **kwargs):
         with open("names.txt", "r") as f:
             names = f.read().split()
         return names
-    if organization is None:
-        logger.info("No GitHub organization specified.")
-        return None
-    if 'username' in kwargs and 'token' in kwargs:
-        username = kwargs['username']
-        token = kwargs['token']
-    else:
-        username = None
-        token = None
-    names = get_all_feedstocks_from_github(organization, username=username, token=token)
+    names = get_all_feedstocks_from_github(**kwargs)
     return names
 
 
 def main(args=None):
     # TODO: move organization to global CONFIG file
     organization = 'nsls-ii-forge'
-    names = get_all_feedstocks(organization, cached=False)
+    names = get_all_feedstocks(cached=False, organization=organization)
     # write each repository name to a file
     with open("names.txt", "w") as f:
         for name in names:
