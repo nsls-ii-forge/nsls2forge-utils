@@ -76,7 +76,7 @@ def all_feedstocks():
     # write to file flag
     parser.add_argument('-w', '--write', dest='write',
                         action='store_true',
-                        help=('Writes the feedstock names to a file.'))
+                        help=('writes the feedstock names to a file.'))
 
     # Set cached to true
     parser.add_argument('-c', '--cached', dest='cached',

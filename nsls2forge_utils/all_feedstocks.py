@@ -1,6 +1,6 @@
 '''
 This code is a rework of
-https://github.com/regro/cf-scripts/blob/master/conda_forge_tick/all_feedstocks.py
+https://github.com/regro/cf-scripts/blob/master/conda_forge_tick/all_feedstocks.py.
 for use by nsls-ii-forge's own auto-tick bot.
 '''
 import datetime
@@ -8,6 +8,7 @@ import logging
 import netrc
 
 import github3
+from conda_smithy import feedstocks
 
 from nsls2forge_utils.io import _write_list_to_file, read_file_to_list
 
@@ -97,12 +98,28 @@ def get_all_feedstocks(cached=False, filepath='names.txt', **kwargs):
     return names
 
 
+def clone_all_feedstocks(organization, feedstocks_dir):
+    '''
+    Clones all feedstock repos from organization to local feedstocks_dir.
+
+    Parameters
+    ----------
+    organization: str
+        GitHub organization to clone feedstock repos from.
+    feedstocks_dir: str
+        Path to local directory to place cloned feedstocks.
+    '''
+    feedstocks.clone_all_feedstocks(gh_org=organization,
+                                    feedstocks_dir=feedstocks_dir)
+
+
 def main(args=None):
     # TODO: move organization to global CONFIG file
     organization = 'nsls-ii-forge'
     names = get_all_feedstocks(cached=False, organization=organization)
     # write each repository name to a file
     _write_list_to_file(names, 'names.txt', sort=True)
+    clone_all_feedstocks(organization, './feedstocks')
 
 
 if __name__ == "__main__":
