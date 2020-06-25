@@ -9,6 +9,8 @@ import netrc
 
 import github3
 
+from nsls2forge_utils.io import _write_list_to_file, read_file_to_list
+
 logger = logging.getLogger(__name__)
 
 
@@ -49,7 +51,7 @@ def get_all_feedstocks_from_github(organization=None, username=None, token=None)
             name = repo.name
             if name.endswith("-feedstock"):
                 name = name.split("-feedstock")[0]
-                logger.info(name)
+                logger.info(f'Found feedstock: {name}')
                 names.append(name)
     except github3.GitHubError:
         msg = ["Github rate limited. "]
@@ -62,10 +64,11 @@ def get_all_feedstocks_from_github(organization=None, username=None, token=None)
             )
         logger.warning(" ".join(msg))
         raise
+    logger.info(f'Found {len(names)} feedstocks from {organization}.')
     return names
 
 
-def get_all_feedstocks(cached=False, **kwargs):
+def get_all_feedstocks(cached=False, filepath='names.txt', **kwargs):
     '''
     Gets all feedstocks either from GitHub or from names.txt if flag is specified.
 
@@ -73,6 +76,8 @@ def get_all_feedstocks(cached=False, **kwargs):
     ----------
     cached: bool, optional
         Specified if client wants to take repository names from names.txt.
+    filepath: str, optional
+        Path to file to read from if cached = True. Default value is 'names.txt'.
     kwargs: dict, optional
         Organization, username and token should be specified here for authentication
         if cached = False.
@@ -84,9 +89,9 @@ def get_all_feedstocks(cached=False, **kwargs):
         None if no organization or username is specified and cached = False.
     '''
     if cached:
-        logger.info("reading names")
-        with open("names.txt", "r") as f:
-            names = f.read().split()
+        logger.info(f"Reading names from cache ({filepath})")
+        names = read_file_to_list(filepath)
+        logger.info(f'Found {len(names)} feedstocks.')
         return names
     names = get_all_feedstocks_from_github(**kwargs)
     return names
@@ -97,9 +102,7 @@ def main(args=None):
     organization = 'nsls-ii-forge'
     names = get_all_feedstocks(cached=False, organization=organization)
     # write each repository name to a file
-    with open("names.txt", "w") as f:
-        for name in names:
-            f.write(f'{name}\n')
+    _write_list_to_file(names, 'names.txt', sort=True)
 
 
 if __name__ == "__main__":
