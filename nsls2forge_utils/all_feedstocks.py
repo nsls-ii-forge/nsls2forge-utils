@@ -64,6 +64,7 @@ def get_all_feedstocks_from_github(organization=None, username=None, token=None)
             )
         logger.warning(" ".join(msg))
         raise
+    logger.info(f'Found {len(names)} feedstocks from {organization}.')
     return names
 
 
@@ -77,7 +78,7 @@ def get_all_feedstocks(cached=False, **kwargs):
         Specified if client wants to take repository names from names.txt.
     kwargs: dict, optional
         Organization, username and token should be specified here for authentication
-        if cached = False.
+        if cached = False. Filepath may also be specified when cached = True.
 
     Returns
     -------
@@ -86,8 +87,15 @@ def get_all_feedstocks(cached=False, **kwargs):
         None if no organization or username is specified and cached = False.
     '''
     if cached:
-        logger.info("Reading names from cache (names.txt)")
-        return read_file_to_list('names.txt')
+        filepath = 'names.txt'
+        if 'filepath' in kwargs:
+            filepath = kwargs['filepath']
+        logger.info("Reading names from cache ({filepath})")
+        names = read_file_to_list(filepath)
+        logger.info(f'Found {len(names)} feedstocks.')
+        return names
+    if 'filepath' in kwargs:
+        kwargs.pop('filepath')
     names = get_all_feedstocks_from_github(**kwargs)
     return names
 
@@ -96,10 +104,8 @@ def main(args=None):
     # TODO: move organization to global CONFIG file
     organization = 'nsls-ii-forge'
     names = get_all_feedstocks(cached=False, organization=organization)
-    # sort names
-    names = sorted(names)
     # write each repository name to a file
-    _write_list_to_file(names, 'names.txt')
+    _write_list_to_file(names, 'names.txt', sort=True)
 
 
 if __name__ == "__main__":
