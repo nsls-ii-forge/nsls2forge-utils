@@ -52,19 +52,7 @@ def check_results():
 
 def all_feedstocks():
     parser = argparse.ArgumentParser(
-        description='Retrieve all feedstock repositories from cache or GitHub '
-                    'and write to file.')
-
-    # Set file path
-    parser.add_argument('-f', '--filepath', dest='filepath',
-                        default='names.txt', type=str,
-                        help=('filepath to write feedstock names to '
-                              '(default is names.txt)'))
-
-    # Set cached to true
-    parser.add_argument('-c', '--cached', dest='cached',
-                        action='store_true',
-                        help=('read the names of feedstocks from the cache'))
+        description=('Retrieve all feedstock repositories from cache or GitHub '))
 
     # Give GitHub organization name
     parser.add_argument('-o', '--organization', dest='organization',
@@ -80,15 +68,35 @@ def all_feedstocks():
                         default=None, type=str,
                         help=('GitHub token for authentication'))
 
+    # Set file path
+    parser.add_argument('-f', '--filepath', dest='filepath',
+                        default='names.txt', type=str,
+                        help=('filepath to write feedstock names to '
+                              '(default is names.txt)'))
+    # write to file flag
+    parser.add_argument('-w', '--write', dest='write',
+                        action='store_true',
+                        help=('Writes the feedstock names to a file.'))
+
+    # Set cached to true
+    parser.add_argument('-c', '--cached', dest='cached',
+                        action='store_true',
+                        help=('read the names of feedstocks from the cache'))
+
     args = parser.parse_args()
 
     if not args.cached and args.organization is None:
-        parser.print_help()
+        parser.exit(message=('ERROR: Organization must be specified unless '
+                             'cached flag is used. Use -h or --help for help.\n'))
 
     names = get_all_feedstocks(cached=args.cached,
                                organization=args.organization,
                                username=args.username,
-                               token=args.token)
-    names = sorted(names)
-    if not args.cached:
-        _write_list_to_file(names, args.filepath)
+                               token=args.token,
+                               filepath=args.filepath)
+    if args.write:
+        _write_list_to_file(names, args.filepath, sort=True)
+
+    for name in sorted(names):
+        print(name)
+    print(f'Total feedstocks: {len(names)}')
