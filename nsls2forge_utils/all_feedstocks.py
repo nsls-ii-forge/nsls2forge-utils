@@ -68,7 +68,7 @@ def get_all_feedstocks_from_github(organization=None, username=None, token=None)
     return names
 
 
-def get_all_feedstocks(cached=False, **kwargs):
+def get_all_feedstocks(cached=False, filepath='names.txt', **kwargs):
     '''
     Gets all feedstocks either from GitHub or from names.txt if flag is specified.
 
@@ -76,9 +76,11 @@ def get_all_feedstocks(cached=False, **kwargs):
     ----------
     cached: bool, optional
         Specified if client wants to take repository names from names.txt.
+    filepath: str, optional
+        Path to file to read from if cached = True. Default value is 'names.txt'.
     kwargs: dict, optional
         Organization, username and token should be specified here for authentication
-        if cached = False. Filepath may also be specified when cached = True.
+        if cached = False.
 
     Returns
     -------
@@ -87,15 +89,10 @@ def get_all_feedstocks(cached=False, **kwargs):
         None if no organization or username is specified and cached = False.
     '''
     if cached:
-        filepath = 'names.txt'
-        if 'filepath' in kwargs:
-            filepath = kwargs['filepath']
-        logger.info("Reading names from cache ({filepath})")
+        logger.info(f"Reading names from cache ({filepath})")
         names = read_file_to_list(filepath)
         logger.info(f'Found {len(names)} feedstocks.')
         return names
-    if 'filepath' in kwargs:
-        kwargs.pop('filepath')
     names = get_all_feedstocks_from_github(**kwargs)
     return names
 
