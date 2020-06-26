@@ -27,6 +27,13 @@ def check_results():
                         help=('a command to check a list of packages in a '
                               'conda environment'))
 
+    # Ignore forbidden channel exception to continue execution
+    parser.add_argument('-i', '--ignore-exception', dest='ignore_exception',
+                        action='store_true',
+                        help=('a command to print the list of packages from '
+                              'the channels which are forbidden and proceed '
+                              'without exiting'))
+
     # Check versions
     parser.add_argument('-p', '--package', dest='package',
                         default=None, type=str,
@@ -42,7 +49,8 @@ def check_results():
 
     if args.check_type == 'channels':
         channels_kwargs = {'forbidden_channel': args.forbidden_channel,
-                           'cmd': args.cmd}
+                           'cmd': args.cmd,
+                           'ignore_exception': args.ignore_exception}
         check_conda_channels(**channels_kwargs)
     elif args.check_type == 'version':
         version_kwargs = {'package': args.package,

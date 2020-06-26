@@ -8,7 +8,8 @@ logger = logging.getLogger(__name__)
 
 
 def check_conda_channels(forbidden_channel='conda-forge',
-                         cmd='conda list --show-channel-url'):
+                         cmd='conda list --show-channel-url',
+                         ignore_exception=False):
     """Check conda channels.
 
     This function checks if the list of channels does not have "forbidden"
@@ -21,6 +22,9 @@ def check_conda_channels(forbidden_channel='conda-forge',
         environment
     cmd: str, optional
         a command to check a list of packages in a conda environment
+    ignore_exception: bool, optional
+        a command to print the list of packages from the channels which are forbidden
+        and proceed without exiting
     """
 
     # TODO: use later once https://github.com/conda/conda/pull/9998 resolved
@@ -41,8 +45,12 @@ def check_conda_channels(forbidden_channel='conda-forge',
 
     if failed_packages:
         formatted = '\n'.join(failed_packages)
-        raise RuntimeError(f'Packages from the "{forbidden_channel}" channel '
-                           f'found:\n{formatted}')
+        if ignore_exception:
+            print(f'Packages from the "{forbidden_channel}" channel '
+                  f'found:\n{formatted}')
+        else:
+            raise RuntimeError(f'Packages from the "{forbidden_channel}" channel '
+                               f'found:\n{formatted}')
     else:
         print(f'No packages were installed from {forbidden_channel}.')
 
