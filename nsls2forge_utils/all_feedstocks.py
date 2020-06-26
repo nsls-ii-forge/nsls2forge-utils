@@ -1,7 +1,8 @@
 '''
 This code is a rework of
-https://github.com/regro/cf-scripts/blob/master/conda_forge_tick/all_feedstocks.py.
-for use by nsls-ii-forge's own auto-tick bot.
+https://github.com/regro/cf-scripts/blob/master/conda_forge_tick/all_feedstocks.py
+This version was not importable so the functions had to be copied here.
+We will be importing conda-smithy functionality.
 '''
 import datetime
 import logging
@@ -101,6 +102,7 @@ def get_all_feedstocks(cached=False, filepath='names.txt', **kwargs):
 def clone_all_feedstocks(organization, feedstocks_dir):
     '''
     Clones all feedstock repos from organization to local feedstocks_dir.
+    Uses conda-smithy's clone all utility.
 
     Parameters
     ----------
