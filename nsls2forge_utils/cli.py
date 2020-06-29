@@ -30,9 +30,9 @@ def check_results():
     # Ignore forbidden channel exception to continue execution
     parser.add_argument('-i', '--ignore-exception', dest='ignore_exception',
                         action='store_true',
-                        help=('a command to print the list of packages from '
-                              'the channels which are forbidden and proceed '
-                              'without exiting'))
+                        help=('a flag to print the list of packages from the '
+                              'channels which are forbidden and proceed '
+                              'without exiting if set to True'))
 
     # Check versions
     parser.add_argument('-p', '--package', dest='package',
