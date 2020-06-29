@@ -89,3 +89,4 @@ status/*
 feedstocks/*
 coverage.xml
 .coverage.*
+miniconda.sh
