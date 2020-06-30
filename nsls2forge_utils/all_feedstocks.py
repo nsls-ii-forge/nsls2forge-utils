@@ -130,10 +130,11 @@ def _list_all_handle_args(args):
                                username=args.username,
                                token=args.token,
                                filepath=args.filepath)
+    names = sorted(names)
     if args.write:
-        _write_list_to_file(names, args.filepath, sort=True)
+        _write_list_to_file(names, args.filepath, sort=False)
 
-    for name in sorted(names):
+    for name in names:
         print(name)
     print(f'Total feedstocks: {len(names)}')
 

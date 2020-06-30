@@ -1,4 +1,5 @@
 import argparse
+import sys
 
 from .check_results import check_conda_channels, check_package_version
 from .all_feedstocks import _list_all_handle_args, _clone_all_handle_args
@@ -67,10 +68,12 @@ def all_feedstocks():
     # Give GitHub username and token
     list_parser.add_argument('-u', '--username', dest='username',
                              default=None, type=str,
-                             help=('GitHub username for authentication'))
+                             help=('GitHub username for authentication. '
+                                   'Uses ~/.netrc by default'))
     list_parser.add_argument('-t', '--token', dest='token',
                              default=None, type=str,
-                             help=('GitHub token for authentication'))
+                             help=('GitHub token for authentication. '
+                                   'Uses ~/.netrc by default'))
 
     # Set file path
     list_parser.add_argument('-f', '--filepath', dest='filepath',
@@ -98,10 +101,17 @@ def all_feedstocks():
     # Set feedstock dir to clone to
     clone_parser.add_argument('-f', '--feedstocks-dir', dest='feedstocks_dir',
                               default='./feedstocks', type=str,
-                              help=('directory to clone feedstocks to'))
+                              help=('Directory to clone feedstocks to. Default is '
+                                    './feedstocks'))
 
     # Set function to handle arguments
     clone_parser.set_defaults(func=_clone_all_handle_args)
 
     args = parser.parse_args()
+
+    # check for no arguments and print help
+    if len(sys.argv) == 1:
+        parser.print_help()
+        parser.exit(message='Please specify organization and sub-command...\n')
+
     args.func(args)
