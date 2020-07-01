@@ -9,7 +9,6 @@ import logging
 import netrc
 
 import github3
-from conda_smithy import feedstocks
 
 from nsls2forge_utils.io import _write_list_to_file, read_file_to_list
 
@@ -111,6 +110,7 @@ def clone_all_feedstocks(organization, feedstocks_dir):
     feedstocks_dir: str
         Path to local directory to place cloned feedstocks.
     '''
+    from conda_smithy import feedstocks
     feedstocks.clone_all(gh_org=organization,
                          feedstocks_dir=feedstocks_dir)
 
