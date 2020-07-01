@@ -1,8 +1,8 @@
 import argparse
+import sys
 
 from .check_results import check_conda_channels, check_package_version
-from .all_feedstocks import get_all_feedstocks
-from .io import _write_list_to_file
+from .all_feedstocks import _list_all_handle_args, _clone_all_handle_args
 
 
 def check_results():
@@ -60,7 +60,7 @@ def check_results():
 
 def all_feedstocks():
     parser = argparse.ArgumentParser(
-        description=('Retrieve all feedstock repositories from cache or GitHub '))
+        description=('List/Clone all feedstock repositories from cache or GitHub '))
 
     # Give GitHub organization name
     parser.add_argument('-o', '--organization', dest='organization',
@@ -68,43 +68,58 @@ def all_feedstocks():
                         help=('GitHub organization to get feedstocks from '
                               '(must be specified if not cached)'))
 
+    subparsers = parser.add_subparsers(help='sub-command help')
+    # Subparser for 'list' command
+    list_parser = subparsers.add_parser('list',
+                                        help=('lists all feedstocks from cache '
+                                              'or GitHub'))
     # Give GitHub username and token
-    parser.add_argument('-u', '--username', dest='username',
-                        default=None, type=str,
-                        help=('GitHub username for authentication'))
-    parser.add_argument('-t', '--token', dest='token',
-                        default=None, type=str,
-                        help=('GitHub token for authentication'))
+    list_parser.add_argument('-u', '--username', dest='username',
+                             default=None, type=str,
+                             help=('GitHub username for authentication. '
+                                   'Uses ~/.netrc by default'))
+    list_parser.add_argument('-t', '--token', dest='token',
+                             default=None, type=str,
+                             help=('GitHub token for authentication. '
+                                   'Uses ~/.netrc by default'))
 
     # Set file path
-    parser.add_argument('-f', '--filepath', dest='filepath',
-                        default='names.txt', type=str,
-                        help=('filepath to write feedstock names to '
-                              '(default is names.txt)'))
+    list_parser.add_argument('-f', '--filepath', dest='filepath',
+                             default='names.txt', type=str,
+                             help=('filepath to write feedstock names to '
+                                   '(default is names.txt)'))
     # write to file flag
-    parser.add_argument('-w', '--write', dest='write',
-                        action='store_true',
-                        help=('Writes the feedstock names to a file.'))
+    list_parser.add_argument('-w', '--write', dest='write',
+                             action='store_true',
+                             help=('writes the feedstock names to a file.'))
 
     # Set cached to true
-    parser.add_argument('-c', '--cached', dest='cached',
-                        action='store_true',
-                        help=('read the names of feedstocks from the cache'))
+    list_parser.add_argument('-c', '--cached', dest='cached',
+                             action='store_true',
+                             help=('read the names of feedstocks from the cache'))
+    # Set function to handle arguments
+    list_parser.set_defaults(func=_list_all_handle_args)
+
+    # Subparser for 'clone' command
+    clone_parser = subparsers.add_parser('clone',
+                                         help=('Clones all feedstocks from GitHub. '
+                                               'Uses ~/.conda-smithy/github.token for '
+                                               'authentication'))
+
+    # Set feedstock dir to clone to
+    clone_parser.add_argument('-f', '--feedstocks-dir', dest='feedstocks_dir',
+                              default='./feedstocks', type=str,
+                              help=('Directory to clone feedstocks to. Default is '
+                                    './feedstocks'))
+
+    # Set function to handle arguments
+    clone_parser.set_defaults(func=_clone_all_handle_args)
 
     args = parser.parse_args()
 
-    if not args.cached and args.organization is None:
-        parser.exit(message=('ERROR: Organization must be specified unless '
-                             'cached flag is used. Use -h or --help for help.\n'))
+    # check for no arguments and print help
+    if len(sys.argv) == 1:
+        parser.print_help()
+        parser.exit(message='Please specify organization and sub-command...\n')
 
-    names = get_all_feedstocks(cached=args.cached,
-                               organization=args.organization,
-                               username=args.username,
-                               token=args.token,
-                               filepath=args.filepath)
-    if args.write:
-        _write_list_to_file(names, args.filepath, sort=True)
-
-    for name in sorted(names):
-        print(name)
-    print(f'Total feedstocks: {len(names)}')
+    args.func(args)
