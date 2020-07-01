@@ -27,7 +27,7 @@ before_install:
 install:
   - conda create -n testenv python=$TRAVIS_PYTHON_VERSION
   - conda activate testenv
-  - conda install -c conda-forge conda-smithy
+  - conda install -c conda-forge conda-smithy -y
   # Install this package and the packages listed in requirements.txt.
   - pip install .
   # Install extra requirements for running tests and building docs.
