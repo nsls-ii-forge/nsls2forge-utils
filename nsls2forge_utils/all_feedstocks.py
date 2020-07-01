@@ -1,13 +1,15 @@
 '''
 This code is a rework of
 https://github.com/regro/cf-scripts/blob/master/conda_forge_tick/all_feedstocks.py
-for use by nsls-ii-forge's own auto-tick bot.
+This version was not importable so the functions had to be copied here.
+We will be importing conda-smithy functionality.
 '''
 import datetime
 import logging
 import netrc
 
 import github3
+from conda_smithy import feedstocks
 
 from nsls2forge_utils.io import _write_list_to_file, read_file_to_list
 
@@ -97,12 +99,53 @@ def get_all_feedstocks(cached=False, filepath='names.txt', **kwargs):
     return names
 
 
+def clone_all_feedstocks(organization, feedstocks_dir):
+    '''
+    Clones all feedstock repos from organization to local feedstocks_dir.
+    Uses conda-smithy's clone all utility.
+
+    Parameters
+    ----------
+    organization: str
+        GitHub organization to clone feedstock repos from.
+    feedstocks_dir: str
+        Path to local directory to place cloned feedstocks.
+    '''
+    feedstocks.clone_all(gh_org=organization,
+                         feedstocks_dir=feedstocks_dir)
+
+
+def _clone_all_handle_args(args):
+    print(f'Cloning feestocks from {args.organization}...')
+    clone_all_feedstocks(args.organization, args.feedstocks_dir)
+
+
+def _list_all_handle_args(args):
+    if not args.cached and args.organization is None:
+        print('ERROR: Organization must be specified unless '
+              'cached flag is used. Use -h or --help for help.')
+        return
+    names = get_all_feedstocks(cached=args.cached,
+                               organization=args.organization,
+                               username=args.username,
+                               token=args.token,
+                               filepath=args.filepath)
+    names = sorted(names)
+    if args.write:
+        _write_list_to_file(names, args.filepath, sort=False)
+
+    for name in names:
+        print(name)
+    print(f'Total feedstocks: {len(names)}')
+
+
 def main(args=None):
     # TODO: move organization to global CONFIG file
     organization = 'nsls-ii-forge'
     names = get_all_feedstocks(cached=False, organization=organization)
     # write each repository name to a file
     _write_list_to_file(names, 'names.txt', sort=True)
+    clone_all_feedstocks(organization, './feedstocks')
 
 
 if __name__ == "__main__":
