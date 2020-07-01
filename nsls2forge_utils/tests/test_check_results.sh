@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "BEGINNING check-results TESTS"
+
 # get and install miniconda
 wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
 chmod +x miniconda.sh
@@ -13,7 +15,7 @@ conda install -c defaults pip -y
 pip install .
 check-results -t channels
 EXIT="$?"
-if [ $EXIT -ne "0" ]; then
+if [ "$EXIT" -gt "0" ]; then
   echo "ERROR: default behavior test failed with exit code $EXIT"
   exit 1
 fi
@@ -22,7 +24,7 @@ fi
 conda install -c defaults python
 check-results -t channels -f conda-forge
 EXIT="$?"
-if [ $EXIT -ne "0" ]; then
+if [ "$EXIT" -gt "0" ]; then
   echo "ERROR: default channel test failed with exit code $EXIT"
   exit 1
 fi
@@ -36,13 +38,14 @@ conda install -c $FORBIDDEN_NAME --override-channels pip -y
 pip install .
 check-results -t channels -f $FORBIDDEN_NAME
 EXIT="$?"
-if [ $EXIT -eq "0" ]; then
+if [ "$EXIT" -eq "0" ]; then
   echo "ERROR: forbidden channel $FORBIDDEN_NAME raise error test failed with exit code $EXIT"
   exit 1
 fi
+
 check-results -t channels -f $FORBIDDEN_NAME -i
 EXIT="$?"
-if [ $EXIT -ne "0" ]; then
+if [ "$EXIT" -gt "0" ]; then
   echo "ERROR: ignore forbidden channel $FORBIDDEN_NAME test failed with exit code $EXIT"
   exit 1
 fi
