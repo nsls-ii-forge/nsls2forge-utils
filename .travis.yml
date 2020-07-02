@@ -6,14 +6,35 @@ cache:
     - $HOME/.cache/pip
     - $HOME/.ccache  # https://github.com/travis-ci/travis-ci/issues/5853
 
+before_install:
+  - |
+    set -e
+    if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+        arch="Linux"
+    elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
+        arch="MacOSX"
+    else
+        echo "Unknown arch $TRAVIS_OS_NAME"
+        exit 1
+    fi
+    wget https://repo.continuum.io/miniconda/Miniconda3-latest-${arch}-x86_64.sh -O miniconda.sh
+    bash miniconda.sh -b -p ~/mc
+    source ~/mc/etc/profile.d/conda.sh
+
 install:
+  - conda create -n testenv python=$TRAVIS_PYTHON_VERSION -y
+  - conda activate testenv
+  - conda install -c conda-forge conda-smithy -y
   # Install this package and the packages listed in requirements.txt.
   - pip install .
   # Install extra requirements for running tests and building docs.
   - pip install -r requirements-dev.txt
+  - conda list --show-channel-url
 
 script:
   - coverage run -m pytest  # Run the tests and check for test coverage.
+  - chmod +x ./nsls2forge_utils/tests/test_check_results.sh  # Add permissions
+  - ./nsls2forge_utils/tests/test_check_results.sh  # Run testing script
   - coverage report -m  # Generate test coverage report.
   - codecov  # Upload the report to codecov.
   - flake8  # Enforce code style ('relaxed' line length limit is set in .flake8 config file).
