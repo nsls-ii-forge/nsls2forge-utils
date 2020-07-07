@@ -1,33 +1,23 @@
+'''
+This code is a rework of
+https://github.com/regro/cf-scripts/blob/master/conda_forge_tick/make_graph.py
+This version was not completely importable so the functions had to be copied
+here and reimplemented.
+We still import some functionality from conda_forge_tick
+'''
 import re
-import collections.abc
-import hashlib
 import logging
 import os
 import time
-from collections import defaultdict
 from concurrent.futures import as_completed
 from copy import deepcopy
-import typing
-from requests import Response
-from typing import List, Optional, Set
 
 import networkx as nx
 import requests
-import yaml
+from shutil import copyfile
 
-from xonsh.lib.collections import ChainDB, _convert_to_dict
-
-from all_feedstocks import get_all_feedstocks
-from conda_forge_tick.utils import (
-    as_iterable,
-    parse_meta_yaml,
-    setup_logger,
-    get_requirements,
-    executor,
-    load_graph,
-    dump_graph,
-    LazyJson,
-)
+from .all_feedstocks import get_all_feedstocks
+from .io import _fetch_file
 
 logger = logging.getLogger(__name__)
 pin_sep_pat = re.compile(r" |>|<|=|\[")
@@ -35,38 +25,6 @@ pin_sep_pat = re.compile(r" |>|<|=|\[")
 NUM_GITHUB_THREADS = 2
 DEBUG = False
 
-
-def _fetch_file(organization, name, filepath):
-    '''
-    Fetches a file from GitHub organization's feedstock.
-
-    Parameters
-    ----------
-    organization: str
-        Name of GitHub organization containing feedstock repos.
-    name: str
-        Feedstock repo name on GitHub
-    filepath: str
-        Path to requested file in feedstock repo
-
-    Returns
-    -------
-    text: str, Response
-        Content of file as a string. If request fails the Response
-        is returned instead.
-    '''
-    r = requests.get(
-        ("https://raw.githubusercontent.com/"
-        f"{organization}/{name}-feedstock/master/{filepath}")
-    )
-    if r.status_code != 200:
-        logger.error(
-            f"Something odd happened when fetching recipe {name}: {r.status_code}",
-        )
-        return r
-
-    text = r.content.decode("utf-8")
-    return text
 
 def get_attrs(name, organization):
     '''
@@ -86,6 +44,8 @@ def get_attrs(name, organization):
         to a JSON file
     '''
     # These fetches could be done via async/multiprocessing
+    from conda_forge_tick.make_graph import populate_feedstock_attributes
+    from conda_forge_tick.utils import LazyJson
     meta_yaml = _fetch_file(organization, name, "recipe/meta.yaml")
     conda_forge_yaml = _fetch_file(organization, name, "conda-forge.yml")
 
@@ -115,6 +75,7 @@ def _build_graph_process_pool(gx, names, new_names, organization):
     organization: str
         Name of GitHub organization containing feedstock repos.
     '''
+    from conda_forge_tick.utils import executor
     with executor("thread", max_workers=20) as pool:
         futures = {
             pool.submit(get_attrs, name, organization): name
@@ -200,6 +161,7 @@ def make_graph(names, organization, gx=None):
         New/Updated dependency graph displaying the relationships
         between packages listed in names.
     '''
+    from conda_forge_tick.utils import LazyJson
     logger.info("reading graph")
 
     if gx is None:
@@ -211,7 +173,7 @@ def make_graph(names, organization, gx=None):
     old_names = sorted(old_names, key=lambda n: gx.nodes[n].get("time", 0))
     total_names = new_names + old_names
     logger.info("start feedstock fetch loop")
-    
+
     builder = _build_graph_sequential if DEBUG else _build_graph_process_pool
     builder(gx, total_names, new_names, organization)
     logger.info("feedstock fetch loop completed")
@@ -264,21 +226,107 @@ def make_graph(names, organization, gx=None):
     return gx
 
 
-def main(args=None):
+def update_versions_in_graph(gx):
+    '''
+    Updates the version numbers for packages in the graph if new
+    versions are available
+    Stores result in directory ./versions/
+    Parameters
+    ----------
+    gx: nx.DiGraph
+        Dependency graph to be updated
+    '''
+    from conda_forge_tick.new_update_versions import update_upstream_versions
+    from conda_forge_tick.make_graph import update_nodes_with_new_versions
+    os.makedirs("versions", exist_ok=True)
+    update_upstream_versions(gx)
+    update_nodes_with_new_versions(gx)
+
+
+def list_dependencies_on(gx, pkg_name):
+    '''
+    Provides a list of package names that require pkg_name to be installed
+    in order to function correctly
+
+    Parameters
+    ----------
+    gx: nx.DiGraph
+        Directinal graph with nodes as packages and dependencies as edges
+    pkg_name: str
+        Name of software package
+
+    Returns
+    -------
+    list
+        List of package names that require pkg_name to be installed
+    '''
+    return list(gx.successors(pkg_name))
+
+
+def list_dependencies_of(gx, pkg_name):
+    '''
+    Provides a list of package names that pkg_name requires to be installed
+    in order to function correctly
+
+    Parameters
+    ----------
+    gx: nx.DiGraph
+        Directinal graph with nodes as packages and dependencies as edges
+    pkg_name: str
+        Name of software package
+
+    Returns
+    -------
+    list
+        List of package names that pkg_name requires to be installed
+    '''
+    return list(gx.predecessors(pkg_name))
+
+
+def _make_graph_handle_args(args):
+    from conda_forge_tick.utils import load_graph, dump_graph
+    from conda_forge_tick.make_graph import update_nodes_with_bot_rerun
     # get a list of all feedstocks from nsls-ii-forge
-    organization = 'nsls-ii-forge'
-    names = get_all_feedstocks(cached=False, organization=organization)
+    global DEBUG
+    DEBUG = args.debug
+    organization = args.organization
+    names = get_all_feedstocks(cached=args.cached, filepath=args.filepath,
+                               organization=organization)
     if os.path.exists("graph.json"):
         gx = load_graph()
     else:
         gx = None
     gx = make_graph(names, organization, gx=gx)
     print("nodes w/o payload:", [k for k, v in gx.nodes.items() if "payload" not in v])
-
     update_nodes_with_bot_rerun(gx)
 
     dump_graph(gx)
 
 
-if __name__ == "__main__":
-    main()
+def _query_graph_handle_args(args):
+    from conda_forge_tick.utils import load_graph
+    if args.filepath != 'graph.json':
+        copyfile(args.filepath, 'graph.json')
+    gx = load_graph()
+    if args.query == 'depends_on':
+        dependencies = list_dependencies_on(gx, args.package)
+        print(f'The following packages require {args.package} to be installed:')
+        for dep in dependencies:
+            print(dep)
+        print(f'Total: {len(dependencies)}')
+    elif args.query == 'depends_of':
+        dependencies = list_dependencies_of(gx, args.package)
+        print(f'{args.package} requires the following packages to be installed:')
+        for dep in dependencies:
+            print(dep)
+        print(f'Total: {len(dependencies)}')
+    else:
+        print(f'Unknown query type: {args.query}')
+
+
+def _update_handle_args(args):
+    from conda_forge_tick.utils import load_graph
+    if args.filepath != 'graph.json':
+        copyfile(args.filepath, 'graph.json')
+    gx = load_graph()
+    update_versions_in_graph(gx)
