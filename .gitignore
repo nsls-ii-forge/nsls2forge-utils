@@ -90,3 +90,4 @@ feedstocks/*
 coverage.xml
 .coverage.*
 miniconda.sh
+README.md
