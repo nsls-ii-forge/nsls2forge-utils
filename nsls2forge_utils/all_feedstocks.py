@@ -15,7 +15,8 @@ from nsls2forge_utils.io import _write_list_to_file, read_file_to_list
 logger = logging.getLogger(__name__)
 
 
-def get_all_feedstocks_from_github(organization=None, username=None, token=None):
+def get_all_feedstocks_from_github(organization=None, username=None, token=None,
+                                   archived=False):
     '''
     Gets all public feedstock repository names from the GitHub organization
     (e.g. nsls-ii-forge).
@@ -30,6 +31,9 @@ def get_all_feedstocks_from_github(organization=None, username=None, token=None)
     password: str, optional
         Password of user on GitHub for authentication.
         Uses value from ~/.netrc if not specified.
+    archived: bool, optional
+        Includes archived feedstocks in returned list
+        when set to True.
 
     Returns
     -------
@@ -49,6 +53,8 @@ def get_all_feedstocks_from_github(organization=None, username=None, token=None)
     names = []
     try:
         for repo in repos:
+            if repo.archived and not archived:
+                continue
             name = repo.name
             if name.endswith("-feedstock"):
                 name = name.split("-feedstock")[0]
@@ -129,7 +135,8 @@ def _list_all_handle_args(args):
                                organization=args.organization,
                                username=args.username,
                                token=args.token,
-                               filepath=args.filepath)
+                               filepath=args.filepath,
+                               archived=args.archived)
     names = sorted(names)
     if args.write:
         _write_list_to_file(names, args.filepath, sort=False)
