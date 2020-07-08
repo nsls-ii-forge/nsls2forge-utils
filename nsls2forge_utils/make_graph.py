@@ -17,9 +17,9 @@ import yaml
 
 from xonsh.lib.collections import ChainDB, _convert_to_dict
 
-from conda_forge_tick.utils import as_iterable
 from all_feedstocks import get_all_feedstocks
-from utils import (
+from conda_forge_tick.utils import (
+    as_iterable,
     parse_meta_yaml,
     setup_logger,
     get_requirements,
@@ -28,7 +28,6 @@ from utils import (
     dump_graph,
     LazyJson,
 )
-from contexts import GithubContext
 
 logger = logging.getLogger(__name__)
 pin_sep_pat = re.compile(r" |>|<|=|\[")
@@ -68,138 +67,6 @@ def _fetch_file(organization, name, filepath):
 
     text = r.content.decode("utf-8")
     return text
-
-
-# TODO: include other files like build_sh
-def populate_feedstock_attributes(name, sub_graph, meta_yaml=None,
-                                  conda_forge_yaml=None):
-    """
-    Parse the various configuration information into useable attributes.
-
-    Parameters
-    ----------
-    name: str
-        Name of the feedstock.
-    sub_graph: LazyJson
-        Dictionary to store attributes with ability to dump to file.
-    meta_yaml: str, optional
-        Text of the meta.yaml file for feedstock recipe.
-    conda_forge_yaml: str, optional
-        Text of the conda-forge.yaml file for feedstock config.
-
-    Returns
-    -------
-    sub_graph: LazyJson
-        Updated dictionary containing possibly different attributes.
-
-    Notes
-    -----
-    If the return is bad hand the response itself in so that it can be parsed
-    for meaning.
-    """
-
-    # update name in subgraph
-    sub_graph.update({"feedstock_name": name, "bad": False})
-
-    # handle all the raw strings
-    if isinstance(meta_yaml, Response):
-        sub_graph["bad"] = f"make_graph: {meta_yaml.status_code}"
-        return sub_graph
-    sub_graph["raw_meta_yaml"] = meta_yaml
-
-    # Get the conda-forge.yml
-    if isinstance(conda_forge_yaml, str):
-        sub_graph["conda-forge.yml"] = {
-            k: v
-            for k, v in yaml.safe_load(conda_forge_yaml).items()
-            if k
-            in {
-                "provider",
-                "min_r_ver",
-                "min_py_ver",
-                "max_py_ver",
-                "max_r_ver",
-                "compiler_stack",
-                "bot",
-            }
-        }
-
-    # create a ChainDB and parse meta yaml based on platform
-    yaml_dict = ChainDB(
-        *[parse_meta_yaml(meta_yaml, platform=plat) for plat in ["win", "osx", "linux"]]
-    )
-    if not yaml_dict:
-        logger.error(f"Something odd happened when parsing recipe {name}")
-        sub_graph["bad"] = "make_graph: Could not parse"
-        return sub_graph
-    # convert ChainDB to dict and add to sub_graph
-    sub_graph["meta_yaml"] = _convert_to_dict(yaml_dict)
-    meta_yaml = sub_graph["meta_yaml"]
-
-    sub_graph["strong_exports"] = False
-    # TODO: make certain to remove None
-    # Get requirements from meta yaml
-    requirements_dict = defaultdict(set)
-    for block in [meta_yaml] + meta_yaml.get("outputs", []) or []:
-        req = block.get("requirements", {}) or {}
-        if isinstance(req, list):
-            requirements_dict["run"].update(set(req))
-            continue
-        for section in ["build", "host", "run"]:
-            requirements_dict[section].update(
-                list(as_iterable(req.get(section, []) or []))
-            )
-        test = block.get("test", {})
-        requirements_dict["test"].update(test.get("requirements", []) or [])
-        requirements_dict["test"].update(test.get("requires", []) or [])
-        run_exports = (block.get("build", {}) or {}).get("run_exports", {})
-        if isinstance(run_exports, dict) and run_exports.get("strong"):
-            sub_graph["strong_exports"] = True
-    # convert list of reqs to set if v is not None
-    for k in list(requirements_dict.keys()):
-        requirements_dict[k] = set(v for v in requirements_dict[k] if v)
-
-    # add all requirements to sub_graph
-    sub_graph["total_requirements"] = dict(requirements_dict)
-    # fix requirements based on regular expression (defined above)
-    sub_graph["requirements"] = {
-        k: {pin_sep_pat.split(x)[0].lower() for x in v}
-        for k, v in sub_graph["total_requirements"].items()
-    }
-
-    # handle multi outputs
-    if "outputs" in yaml_dict:
-        sub_graph["outputs_names"] = sorted(
-            list({d.get("name", "") for d in yaml_dict["outputs"]}),
-        )
-
-    # TODO: Write schema for dict
-    # TODO: remove this
-    req = get_requirements(yaml_dict)
-    sub_graph["req"] = req
-    # find missing keys
-    keys = [("package", "name"), ("package", "version")]
-    missing_keys = [k[1] for k in keys if k[1] not in yaml_dict.get(k[0], {})]
-    source = yaml_dict.get("source", [])
-    if isinstance(source, collections.abc.Mapping):
-        source = [source]
-    source_keys = set()
-    for s in source:
-        if not sub_graph.get("url"):
-            sub_graph["url"] = s.get("url")
-        source_keys |= s.keys()
-    if "url" not in source_keys:
-        missing_keys.append("url")
-    if missing_keys:
-        logger.error(f"Recipe {name} doesn't have a {', '.join(missing_keys)}")
-    for k in keys:
-        if k[1] not in missing_keys:
-            sub_graph[k[1]] = yaml_dict[k[0]][k[1]]
-    kl = list(sorted(source_keys & hashlib.algorithms_available, reverse=True))
-    if kl:
-        sub_graph["hash_type"] = kl[0]
-    return sub_graph
-
 
 def get_attrs(name, organization):
     '''
@@ -395,27 +262,6 @@ def make_graph(names, organization, gx=None):
             gx.add_edge(dep, node)
     logger.info("new nodes and edges infered")
     return gx
-
-
-def update_nodes_with_bot_rerun(gx):
-    """Go through all the open PRs and check if they are rerun"""
-    for name, node in gx.nodes.items():
-        with node["payload"] as payload:
-            for migration in payload.get("PRed", []):
-                pr_json = migration.get("PR", {})
-                # if there is a valid PR and it isn't currently listed as rerun
-                # but the PR needs a rerun
-                if (
-                    pr_json
-                    and not migration["data"]["bot_rerun"]
-                    and "bot-rerun" in [lb["name"] for lb in pr_json.get("labels", [])]
-                ):
-                    migration["data"]["bot_rerun"] = time.time()
-                    logger.info(
-                        "BOT-RERUN %s: processing bot rerun label for migration %s",
-                        name,
-                        migration["data"],
-                    )
 
 
 def main(args=None):
