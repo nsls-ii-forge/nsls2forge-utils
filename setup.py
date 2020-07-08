@@ -48,6 +48,7 @@ setup(
         'console_scripts': [
             'check-results = nsls2forge_utils.cli:check_results',
             'all-feedstocks = nsls2forge_utils.cli:all_feedstocks',
+            'dashboard = nsls2forge_utils.cli:dashboard',
         ],
     },
     include_package_data=True,
