@@ -20,11 +20,14 @@ def create_dashboard(names=None, write_to='README.md'):
         without the -feedstock suffix
     write_to: str, optional
         filepath to markdown file to write output to
+<<<<<<< HEAD
 
     Returns
     -------
     int
         number of packages being displayed in the dashboard
+=======
+>>>>>>> 0d0bdf2... created cli for dashboard and updated script
     '''
     # TODO: Azure Pipeline direct pipeline link
     # TODO: Add codecov badge if available
