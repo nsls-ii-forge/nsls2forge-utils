@@ -3,6 +3,7 @@ import sys
 
 from .check_results import check_conda_channels, check_package_version
 from .all_feedstocks import _list_all_handle_args, _clone_all_handle_args
+from .meta_utils import get_attribute, download_from_source
 
 
 def check_results():
@@ -129,3 +130,49 @@ def all_feedstocks():
         parser.exit(message='Please specify organization and sub-command...\n')
 
     args.func(args)
+
+
+def meta_utils():
+    parser = argparse.ArgumentParser(
+        description=('Extract and operate on information from meta.yaml '
+                     'feedstock files'))
+
+    # Get attribute from meta.yaml
+    parser.add_argument('-g', '--get', dest='attribute',
+                        default='', type=str,
+                        help=('Get an attribute from meta.yaml file '))
+
+    # Download package flag
+    parser.add_argument('-d', '--download', dest='download',
+                        action='store_true',
+                        help=('Dowload source tar.gz file for package'))
+
+    # Give GitHub organization name
+    parser.add_argument('-o', '--organization', dest='organization',
+                        default=None, type=str,
+                        help=('GitHub organization to get feedstocks from '
+                              '(must be specified if not cached)'))
+
+    # Package name
+    parser.add_argument('-p', '--package', dest='package',
+                        default=None, type=str,
+                        help=('Software package name with feedstock available'))
+
+    # Cached flag
+    parser.add_argument('-c', '--cached', dest='cached',
+                        action='store_true',
+                        help=('Specify to use cached feedstock. Must be '
+                              'in feedstocks/ dir in current working directory. '
+                              'Works well with default behavior of all-feedstocks clone'))
+
+    args = parser.parse_args()
+    if args.download:
+        url, sha256 = download_from_source(args.package,
+                                           organization=args.organization,
+                                           cached=args.cached)
+        print(f'Successfully downloaded {url}\nsha256: {sha256}')
+    else:
+        attr = get_attribute(args.attribute, args.package,
+                             organization=args.organization,
+                             cached=args.cached)
+        print(f'{args.attribute}: {attr}')
