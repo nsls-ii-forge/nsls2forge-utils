@@ -138,8 +138,8 @@ def meta_utils():
                      'feedstock files'))
 
     # Get attribute from meta.yaml
-    parser.add_argument('-g', '--get', dest='attribute',
-                        default='', type=str,
+    parser.add_argument('-g', '--get', dest='attributes',
+                        nargs='+',
                         help=('Get an attribute from meta.yaml file '))
 
     # Download package flag
@@ -166,13 +166,14 @@ def meta_utils():
                               'Works well with default behavior of all-feedstocks clone'))
 
     args = parser.parse_args()
+    args.attributes = ' '.join(args.attributes)
     if args.download:
         url, sha256 = download_from_source(args.package,
                                            organization=args.organization,
                                            cached=args.cached)
         print(f'Successfully downloaded {url}\nsha256: {sha256}')
     else:
-        attr = get_attribute(args.attribute, args.package,
+        attr = get_attribute(args.attributes, args.package,
                              organization=args.organization,
                              cached=args.cached)
-        print(f'{args.attribute}: {attr}')
+        print(f'{args.attributes}: {attr}')
