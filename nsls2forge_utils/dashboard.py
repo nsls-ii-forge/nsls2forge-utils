@@ -32,9 +32,9 @@ def create_dashboard(names=None, write_to='README.md'):
     # TODO: Azure Pipeline direct pipeline link
     # TODO: Add codecov badge if available
     main_format = dict(
-      build='[![Build Status](https://dev.azure.com/nsls2forge/nsls2forge/_apis/build/status/{name}-feedstock)]'
+      build='[![Not Found](https://dev.azure.com/nsls2forge/nsls2forge/_apis/build/status/{name}-feedstock)]'
             '(https://dev.azure.com/nsls2forge/nsls2forge/_build)',
-      health='[![Code Health](https://landscape.io/github/nsls-ii-forge/{name}-feedstock/master/'
+      health='[![Not Found](https://landscape.io/github/nsls-ii-forge/{name}-feedstock/master/'
              'landscape.svg?style=flat)](https://landscape.io/github/nsls-ii-forge/{name}-feedstock/master)',
       cf_version='[![conda-forge version](https://img.shields.io/conda/vn/conda-forge/{name})]'
                  '(https://anaconda.org/conda-forge/{name})',
