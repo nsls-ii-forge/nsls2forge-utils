@@ -49,6 +49,7 @@ setup(
             'check-results = nsls2forge_utils.cli:check_results',
             'all-feedstocks = nsls2forge_utils.cli:all_feedstocks',
             'meta-utils = nsls2forge_utils.cli:meta_utils',
+            'dashboard = nsls2forge_utils.cli:dashboard',
         ],
     },
     include_package_data=True,
