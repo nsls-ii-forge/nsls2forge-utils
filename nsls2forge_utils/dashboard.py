@@ -4,8 +4,8 @@ https://github.com/xpdAcq/mission-control/blob/master/tools/update_readme.py
 This version was not importable so the
 functions had to be re-implemented here.
 """
-from nsls2forge_utils.all_feedstocks import get_all_feedstocks
-from nsls2forge_utils.io import read_file_to_list
+from .all_feedstocks import get_all_feedstocks
+from .io import read_file_to_list
 
 
 def create_dashboard(names=None, write_to='README.md'):
