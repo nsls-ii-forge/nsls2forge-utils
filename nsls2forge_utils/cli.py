@@ -166,13 +166,13 @@ def meta_utils():
                               'Works well with default behavior of all-feedstocks clone'))
 
     args = parser.parse_args()
-    args.attributes = ' '.join(args.attributes)
     if args.download:
         url, sha256 = download_from_source(args.package,
                                            organization=args.organization,
                                            cached=args.cached)
         print(f'Successfully downloaded {url}\nsha256: {sha256}')
     else:
+        args.attributes = ' '.join(args.attributes)
         attr = get_attribute(args.attributes, args.package,
                              organization=args.organization,
                              cached=args.cached)
