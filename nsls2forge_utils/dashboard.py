@@ -40,11 +40,12 @@ def create_dashboard(names=None, write_to='README.md'):
                 '(https://anaconda.org/nsls2forge/{name})')
 
     row_string = ('|[{name}](https://github.com/nsls-ii-forge/{name}-feedstock)|{build} <br/> {health}'
-    '|{nsls_version} <br/> {pypi_version} <br/> {defaults_version} <br/> {cf_version}|{downloads}|\n')
+                  '|{nsls_version} <br/> {pypi_version} <br/> {defaults_version} <br/> '
+                  '{cf_version}|{downloads}|\n')
     description = '''# Project Management\nReleases, Installers, Specs, and more!\n'''
     header = ('# Feedstock Packages Build Status\n\n'
-    '| Repo | Build <br/> Health | nsls2forge <br/> PyPI <br/> defaults <br/> conda-forge <br/> Versions | Downloads|\n'
-    '|:-------:|:-----------:|:---------------:|:--------------:|\n')
+              '| Repo | Build <br/> Health | nsls2forge <br/> PyPI <br/> defaults <br/> conda-forge <br/>'
+              ' Versions | Downloads|\n|:-------:|:-----------:|:---------------:|:--------------:|\n')
 
     out = description
     if names is None:
