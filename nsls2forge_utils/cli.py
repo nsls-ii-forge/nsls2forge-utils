@@ -4,6 +4,7 @@ import sys
 from .check_results import check_conda_channels, check_package_version
 from .all_feedstocks import _list_all_handle_args, _clone_all_handle_args
 from .meta_utils import get_attribute, download_from_source
+from .dashboard import create_dashboard
 
 
 def check_results():
@@ -177,3 +178,21 @@ def meta_utils():
                              organization=args.organization,
                              cached=args.cached)
         print(f'{args.attributes}: {attr}')
+
+
+def dashboard():
+    parser = argparse.ArgumentParser(
+        description='Create a dashboard of feedstocks belonging to nsls-ii-forge')
+
+    parser.add_argument('-n', '--names', dest='names',
+                        default=None, type=str,
+                        help=('filepath to text file containing feedstock repo names '
+                              'without the -feedstock suffix (optional)'))
+
+    parser.add_argument('-w', '--write', dest='write',
+                        default='README.md', type=str,
+                        help=('filepath to markdown file to write output to'))
+
+    args = parser.parse_args()
+
+    create_dashboard(names=args.names)
