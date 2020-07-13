@@ -3,7 +3,7 @@ import sys
 
 from .check_results import check_conda_channels, check_package_version
 from .all_feedstocks import (
-    _list_all_handle_args, 
+    _list_all_handle_args,
     _clone_all_handle_args,
     _info_handle_args
 )
@@ -128,7 +128,7 @@ def all_feedstocks():
 
     info_parser = subparsers.add_parser('info',
                                         help=('Gathers and prints version and other Git '
-                                            'info about all currently cloned feedstocks'))
+                                              'info about all currently cloned feedstocks'))
 
     info_parser.add_argument('-f', '--feedstocks-dir', dest='feedstocks_dir',
                              default='./feedstocks/', type=str,
