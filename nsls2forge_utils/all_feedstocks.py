@@ -7,10 +7,21 @@ We will be importing conda-smithy functionality.
 import datetime
 import logging
 import netrc
+import os
+import glob
 
 import github3
+import git
+import markdown
+import pandas as pd
+import requests
+from bs4 import BeautifulSoup
+from tabulate import tabulate
 
-from nsls2forge_utils.io import _write_list_to_file, read_file_to_list
+from nsls2forge_utils.io import (
+    _write_list_to_file,
+    read_file_to_list
+)
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +86,8 @@ def get_all_feedstocks_from_github(organization=None, username=None, token=None,
     return names
 
 
-def get_all_feedstocks(cached=False, filepath='names.txt', **kwargs):
+def get_all_feedstocks(cached=False, filepath='names.txt',
+                       feedstocks_dir='./feedstocks/', **kwargs):
     '''
     Gets all feedstocks either from GitHub or from names.txt if flag is specified.
 
@@ -96,8 +108,16 @@ def get_all_feedstocks(cached=False, filepath='names.txt', **kwargs):
         None if no organization or username is specified and cached = False.
     '''
     if cached:
-        logger.info(f"Reading names from cache ({filepath})")
-        names = read_file_to_list(filepath)
+        if os.path.exists(filepath):
+            logger.info(f"Reading names from cache ({filepath})")
+            names = read_file_to_list(filepath)
+        elif os.path.exists(feedstocks_dir):
+            logger.info(f'Reading names from cloned repo cache ({feedstocks_dir})')
+            names = sorted(glob.glob(feedstocks_dir + "*-feedstock"))
+            names = [n.replace('-feedstock', '').replace(feedstocks_dir, '') for n in names]
+        else:
+            logger.critical('No cached feedstocks found')
+            return []
         logger.info(f'Found {len(names)} feedstocks.')
         return names
     names = get_all_feedstocks_from_github(**kwargs)
@@ -119,6 +139,47 @@ def clone_all_feedstocks(organization, feedstocks_dir):
     from conda_smithy import feedstocks
     feedstocks.clone_all(gh_org=organization,
                          feedstocks_dir=feedstocks_dir)
+
+
+def all_feedstocks_info(feedstocks_dir='./feedstocks/'):
+    '''
+    Gathers and prints version and other Git info about all currently cloned
+    feedstocks
+
+    Parameters
+    ----------
+    feedstocks_dir: str, optional
+        Directory where cloned feedstocks are. Default is './feedstocks/'.
+    '''
+    all_feedstocks = get_all_feedstocks(cached=True, feedstocks_dir=feedstocks_dir)
+    info = []
+    for i, feedstock in enumerate(all_feedstocks):
+        feedstock += '-feedstock'
+        repo_path = os.path.join(feedstocks_dir, feedstock)
+        # Get version info from README.md's badge via requesting the info from svg:
+        try:
+            with open(os.path.join(repo_path, 'README.md')) as f:
+                html_text = markdown.markdown(f.read())
+                html = BeautifulSoup(html_text, features='lxml')
+                svg = html.findAll('img', attrs={'alt': 'Conda Version'})[0]
+                r = requests.get(svg.attrs['src'])
+                svg_html = BeautifulSoup(r.text, features='lxml')
+                version_tag = svg_html.findAll('text')[-1]
+                version = version_tag.text
+        except Exception:
+            version = ''
+
+        # Extract info from git:
+        repo = git.Repo(repo_path)
+        info.append([feedstock, repo.active_branch.name, repo.is_dirty(), version])
+
+    columns = ['Name', 'Branch', 'Changed?', 'Version']
+    df = pd.DataFrame(info, columns=columns)
+    print(tabulate(df, headers=df.columns))
+
+
+def _info_handle_args(args):
+    all_feedstocks_info(feedstocks_dir=args.feedstocks_dir)
 
 
 def _clone_all_handle_args(args):
