@@ -5,6 +5,8 @@ coverage
 flake8
 pytest
 sphinx
+markdown
+bs4
 # These are dependencies of various sphinx extensions for documentation.
 ipython
 matplotlib

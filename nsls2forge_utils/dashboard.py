@@ -5,7 +5,6 @@ This version was not importable so the
 functions had to be re-implemented here.
 """
 from .all_feedstocks import get_all_feedstocks
-from .io import read_file_to_list
 
 
 def create_dashboard(names=None, write_to='README.md'):
@@ -25,18 +24,18 @@ def create_dashboard(names=None, write_to='README.md'):
     # TODO: Azure Pipeline direct pipeline link
     # TODO: Add codecov badge if available
     main_format = dict(
-      build='[![Not Found](https://dev.azure.com/nsls2forge/nsls2forge/_apis/build/status/{name}-feedstock)]'
+      build='[![Build Status](https://dev.azure.com/nsls2forge/nsls2forge/_apis/build/status/{name}-feedstock)]'
             '(https://dev.azure.com/nsls2forge/nsls2forge/_build)',
-      health='[![Not Found](https://landscape.io/github/nsls-ii-forge/{name}-feedstock/master/'
+      health='[![Code Health](https://landscape.io/github/nsls-ii-forge/{name}-feedstock/master/'
              'landscape.svg?style=flat)](https://landscape.io/github/nsls-ii-forge/{name}-feedstock/master)',
-      cf_version='[![Not Found](https://img.shields.io/conda/vn/conda-forge/{name})]'
+      cf_version='[![conda-forge version](https://img.shields.io/conda/vn/conda-forge/{name})]'
                  '(https://anaconda.org/conda-forge/{name})',
-      nsls_version='[![Not Found](https://img.shields.io/conda/vn/nsls2forge/{name})]'
+      nsls_version='[![nsls2forge version](https://img.shields.io/conda/vn/nsls2forge/{name})]'
                    '(https://anaconda.org/nsls2forge/{name})',
-      defaults_version='[![Not Found](https://img.shields.io/conda/vn/anaconda/{name})]'
+      defaults_version='[![defaults version](https://img.shields.io/conda/vn/anaconda/{name})]'
                        '(https://anaconda.org/anaconda/{name})',
-      pypi_version='[![Not Found](https://img.shields.io/pypi/v/{name})](https://pypi.org/project/{name}/)',
-      downloads='[![Not Found](https://img.shields.io/conda/dn/nsls2forge/{name})]'
+      pypi_version='[![PyPI version](https://img.shields.io/pypi/v/{name})](https://pypi.org/project/{name}/)',
+      downloads='[![Downloads](https://img.shields.io/conda/dn/nsls2forge/{name})]'
                 '(https://anaconda.org/nsls2forge/{name})')
 
     row_string = ('|[{name}](https://github.com/nsls-ii-forge/{name}-feedstock)|{build} <br/> {health}'
@@ -51,7 +50,7 @@ def create_dashboard(names=None, write_to='README.md'):
     if names is None:
         pkgs = sorted(get_all_feedstocks(organization='nsls-ii-forge'))
     else:
-        pkgs = sorted(read_file_to_list(names))
+        pkgs = sorted(get_all_feedstocks(cached=True, filepath=names))
     out += header
     for pkg in pkgs:
         tmp = row_string.format(**main_format, name=pkg)
