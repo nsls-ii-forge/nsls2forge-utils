@@ -86,12 +86,11 @@ def test_fake_feedstock():
 
 
 def test_default():
-	names = get_all_feedstocks(organization='nsls-ii-forge')
-	create_dashboard()
+	num_rows = create_dashboard()
 	with open('README.md', 'r') as f:
 		html_text = markdown.markdown(f.read())
 		html = BeautifulSoup(html_text, features='lxml')
 		svgs = html.findAll('img', attrs={'alt':'Build Status'})
-		assert len(svgs) == len(names)
+		assert len(svgs) == num_rows
 	os.remove('README.md')
 
