@@ -1,10 +1,10 @@
-from conda_forge_tick.utils import parse_meta_yaml
 import requests
 
 from nsls2forge_utils.io import _fetch_file
 
 
 def _fetch_and_parse_meta_yaml(name, organization=None, cached=False):
+    from conda_forge_tick.utils import parse_meta_yaml
     if cached:
         with open(f'feedstocks/{name}-feedstock/recipe/meta.yaml', 'r') as f:
             meta_yaml = f.read()
