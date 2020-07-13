@@ -29,14 +29,14 @@ def create_dashboard(names=None, write_to='README.md'):
             '(https://dev.azure.com/nsls2forge/nsls2forge/_build)',
       health='[![Not Found](https://landscape.io/github/nsls-ii-forge/{name}-feedstock/master/'
              'landscape.svg?style=flat)](https://landscape.io/github/nsls-ii-forge/{name}-feedstock/master)',
-      cf_version='[![Not Found](https://anaconda.org/conda-forge/{name}/badges/version.svg)]'
+      cf_version='[![Not Found](https://img.shields.io/conda/vn/conda-forge/{name})]'
                  '(https://anaconda.org/conda-forge/{name})',
-      nsls_version='[![Not Found](https://anaconda.org/nsls2forge/{name}/badges/version.svg)]'
+      nsls_version='[![Not Found](https://img.shields.io/conda/vn/nsls2forge/{name})]'
                    '(https://anaconda.org/nsls2forge/{name})',
-      defaults_version='[![Not Found](https://anaconda.org/anaconda/{name}/badges/version.svg)]'
+      defaults_version='[![Not Found](https://img.shields.io/conda/vn/anaconda/{name})]'
                        '(https://anaconda.org/anaconda/{name})',
       pypi_version='[![Not Found](https://img.shields.io/pypi/v/{name})](https://pypi.org/project/{name}/)',
-      downloads='[![Not Found](https://anaconda.org/nsls2forge/{name}/badges/downloads.svg)]'
+      downloads='[![Not Found](https://img.shields.io/conda/dn/nsls2forge/{name})]'
                 '(https://anaconda.org/nsls2forge/{name})')
 
     row_string = ('|[{name}](https://github.com/nsls-ii-forge/{name}-feedstock)|{build} <br/> {health}'
