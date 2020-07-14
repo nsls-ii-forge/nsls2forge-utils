@@ -1,33 +1,14 @@
 import re
-import collections.abc
-import hashlib
 import logging
 import os
 import time
-from collections import defaultdict
 from concurrent.futures import as_completed
 from copy import deepcopy
-import typing
-from requests import Response
-from typing import List, Optional, Set
 
 import networkx as nx
 import requests
-import yaml
-
-from xonsh.lib.collections import ChainDB, _convert_to_dict
 
 from all_feedstocks import get_all_feedstocks
-from conda_forge_tick.utils import (
-    as_iterable,
-    parse_meta_yaml,
-    setup_logger,
-    get_requirements,
-    executor,
-    load_graph,
-    dump_graph,
-    LazyJson,
-)
 
 logger = logging.getLogger(__name__)
 pin_sep_pat = re.compile(r" |>|<|=|\[")
@@ -57,7 +38,7 @@ def _fetch_file(organization, name, filepath):
     '''
     r = requests.get(
         ("https://raw.githubusercontent.com/"
-        f"{organization}/{name}-feedstock/master/{filepath}")
+         f"{organization}/{name}-feedstock/master/{filepath}")
     )
     if r.status_code != 200:
         logger.error(
@@ -67,6 +48,7 @@ def _fetch_file(organization, name, filepath):
 
     text = r.content.decode("utf-8")
     return text
+
 
 def get_attrs(name, organization):
     '''
@@ -86,6 +68,8 @@ def get_attrs(name, organization):
         to a JSON file
     '''
     # These fetches could be done via async/multiprocessing
+    from conda_forge_tick.make_graph import populate_feedstock_attributes
+    from conda_forge_tick.utils import LazyJson
     meta_yaml = _fetch_file(organization, name, "recipe/meta.yaml")
     conda_forge_yaml = _fetch_file(organization, name, "conda-forge.yml")
 
@@ -115,6 +99,7 @@ def _build_graph_process_pool(gx, names, new_names, organization):
     organization: str
         Name of GitHub organization containing feedstock repos.
     '''
+    from conda_forge_tick.utils import executor
     with executor("thread", max_workers=20) as pool:
         futures = {
             pool.submit(get_attrs, name, organization): name
@@ -200,6 +185,7 @@ def make_graph(names, organization, gx=None):
         New/Updated dependency graph displaying the relationships
         between packages listed in names.
     '''
+    from conda_forge_tick.utils import LazyJson
     logger.info("reading graph")
 
     if gx is None:
@@ -211,7 +197,7 @@ def make_graph(names, organization, gx=None):
     old_names = sorted(old_names, key=lambda n: gx.nodes[n].get("time", 0))
     total_names = new_names + old_names
     logger.info("start feedstock fetch loop")
-    
+
     builder = _build_graph_sequential if DEBUG else _build_graph_process_pool
     builder(gx, total_names, new_names, organization)
     logger.info("feedstock fetch loop completed")
@@ -266,6 +252,8 @@ def make_graph(names, organization, gx=None):
 
 def main(args=None):
     # get a list of all feedstocks from nsls-ii-forge
+    from conda_forge_tick.utils import load_graph, dump_graph
+    from conda_forge_tick.make_graph import update_nodes_with_bot_rerun
     organization = 'nsls-ii-forge'
     names = get_all_feedstocks(cached=False, organization=organization)
     if os.path.exists("graph.json"):
@@ -273,8 +261,7 @@ def main(args=None):
     else:
         gx = None
     gx = make_graph(names, organization, gx=gx)
-    print("nodes w/o payload:", [k for k, v in gx.nodes.items() if "payload" not in v])
-
+    print("nodes w/o payload:", [k for k, v in gx.nodes.items() if "payload" not in v]
     update_nodes_with_bot_rerun(gx)
 
     dump_graph(gx)
