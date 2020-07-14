@@ -10,7 +10,7 @@ import netrc
 import os
 import glob
 
-from github import Github
+from github import Github, GithubException
 import git
 import markdown
 import pandas as pd
@@ -58,11 +58,11 @@ def get_all_feedstocks_from_github(organization=None, username=None, token=None,
     if username is None:
         netrc_file = netrc.netrc()
         username, _, token = netrc_file.hosts['github.com']
+    names = []
     gh = Github(username, token)
     org = gh.get_organization(organization)
-    repos = org.get_repos()
-    names = []
     try:
+        repos = org.get_repos()
         for repo in repos:
             if repo.archived and not archived:
                 continue
@@ -71,11 +71,11 @@ def get_all_feedstocks_from_github(organization=None, username=None, token=None,
                 name = name.split("-feedstock")[0]
                 logger.info(f'Found feedstock: {name}')
                 names.append(name)
-    except github3.GitHubError:
+    except GithubException:
         msg = ["Github rate limited. "]
-        c = gh.rate_limit()["resources"]["core"]
-        if c["remaining"] == 0:
-            ts = c["reset"]
+        remaining, _ = gh.rate_limiting
+        if remaining == 0:
+            ts = gh.rate_limiting_resettime
             msg.append("API timeout, API returns at")
             msg.append(
                 datetime.datetime.utcfromtimestamp(ts).strftime("%Y-%m-%dT%H:%M:%SZ"),
