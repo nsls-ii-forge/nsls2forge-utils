@@ -261,7 +261,7 @@ def main(args=None):
     else:
         gx = None
     gx = make_graph(names, organization, gx=gx)
-    print("nodes w/o payload:", [k for k, v in gx.nodes.items() if "payload" not in v]
+    print("nodes w/o payload:", [k for k, v in gx.nodes.items() if "payload" not in v])
     update_nodes_with_bot_rerun(gx)
 
     dump_graph(gx)
