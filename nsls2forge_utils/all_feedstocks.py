@@ -10,7 +10,7 @@ import netrc
 import os
 import glob
 
-import github3
+from github import Github
 import git
 import markdown
 import pandas as pd
@@ -58,9 +58,9 @@ def get_all_feedstocks_from_github(organization=None, username=None, token=None,
     if username is None:
         netrc_file = netrc.netrc()
         username, _, token = netrc_file.hosts['github.com']
-    gh = github3.login(username, token)
-    org = gh.organization(organization)
-    repos = org.repositories()
+    gh = Github(username, token)
+    org = gh.get_organization(organization)
+    repos = org.get_repos()
     names = []
     try:
         for repo in repos:
