@@ -87,6 +87,7 @@ pr_json/*
 pr_status/*
 status/*
 feedstocks/*
+versions/*
 coverage.xml
 .coverage.*
 miniconda.sh

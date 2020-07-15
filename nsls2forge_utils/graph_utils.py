@@ -258,6 +258,23 @@ def make_graph(names, organization, gx=None):
     return gx
 
 
+def update_versions_in_graph(gx):
+    '''
+    Updates the version numbers for packages in the graph if new
+    versions are available
+    Stores result in directory ./versions/
+    Parameters
+    ----------
+    gx: nx.DiGraph
+        Dependency graph to be updated
+    '''
+    from conda_forge_tick.new_update_versions import update_upstream_versions
+    from conda_forge_tick.make_graph import update_nodes_with_new_versions
+    os.makedirs("versions", exist_ok=True)
+    update_upstream_versions(gx)
+    update_nodes_with_new_versions(gx)
+
+
 def list_dependencies_on(gx, pkg_name):
     '''
     Provides a list of package names that require pkg_name to be installed
@@ -337,3 +354,11 @@ def _query_graph_handle_args(args):
         print(f'Total: {len(dependencies)}')
     else:
         print(f'Unknown query type: {args.query}')
+
+
+def _update_handle_args(args):
+    from conda_forge_tick.utils import load_graph
+    if args.filepath != 'graph.json':
+        copyfile(args.filepath, 'graph.json')
+    gx = load_graph()
+    update_versions_in_graph(gx)
