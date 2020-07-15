@@ -322,7 +322,6 @@ def _query_graph_handle_args(args):
         print(f'Total: {len(dependencies)}')
     else:
         print(f'Unknown query type: {args.query}')
-<<<<<<< HEAD:nsls2forge_utils/graph_utils.py
 
 
 def _update_handle_args(args):
@@ -331,5 +330,3 @@ def _update_handle_args(args):
         copyfile(args.filepath, 'graph.json')
     gx = load_graph()
     update_versions_in_graph(gx)
-=======
->>>>>>> d4071f5... changed entry point and added query options:nsls2forge_utils/make_graph.py

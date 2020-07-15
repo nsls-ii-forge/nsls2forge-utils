@@ -9,7 +9,11 @@ from .all_feedstocks import (
     _info_handle_args
 )
 from .dashboard import create_dashboard
-from .graph_utils import _make_graph_handle_args, _query_graph_handle_args
+from .graph_utils import (
+    _make_graph_handle_args,
+    _query_graph_handle_args,
+    _update_handle_args
+)
 
 
 def check_results():
@@ -260,6 +264,16 @@ def graph_utils():
                              help=('Type of query: depends_on, depends_of'))
 
     info_parser.set_defaults(func=_query_graph_handle_args)
+
+    update_parser = subparsers.add_parser('update',
+                                          help=('Update package versions in graph from '
+                                                'various sources'))
+
+    update_parser.add_argument('-f', '--filepath', dest='filepath',
+                               default='graph.json', type=str,
+                               help=('Path to JSON file where the graph is stored'))
+
+    update_parser.set_defaults(func=_update_handle_args)
 
     args = parser.parse_args()
 
