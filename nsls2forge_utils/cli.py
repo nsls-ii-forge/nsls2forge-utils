@@ -4,6 +4,7 @@ import sys
 from .check_results import check_conda_channels, check_package_version
 from .all_feedstocks import _list_all_handle_args, _clone_all_handle_args
 from .dashboard import create_dashboard
+from .make_graph import _make_graph_handle_args
 
 
 def check_results():
@@ -148,3 +149,30 @@ def dashboard():
     args = parser.parse_args()
 
     create_dashboard(names=args.names)
+
+
+def make_graph():
+    parser = argparse.ArgumentParser(
+        description=('Create a dependency graph of feedstock packages '
+                     '(outputs to graph.json)'))
+
+    parser.add_argument('-o', '--organization', dest='organization',
+                        default=None, type=str,
+                        help=('GitHub organization to get recipe files from'))
+
+    parser.add_argument('-c', '--cached', dest='cached',
+                        action='store_true',
+                        help=('Specify if feedstock names are to be pulled from '
+                              'a text file'))
+
+    parser.add_argument('-f', '--filepath', dest='filepath',
+                        default='names.txt', type=str,
+                        help=('Path to text file containing feedstock names'))
+
+    parser.add_argument('-d', '--debug', dest='debug',
+                        action='store_true',
+                        help=('Specify to create graph sequentially'))
+
+    args = parser.parse_args()
+
+    _make_graph_handle_args(args)

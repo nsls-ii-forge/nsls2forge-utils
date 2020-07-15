@@ -1,3 +1,10 @@
+'''
+This code is a rework of
+https://github.com/regro/cf-scripts/blob/master/conda_forge_tick/make_graph.py
+This version was not completely importable so the functions had to be copied
+here and reimplemented.
+We still import some functionality from conda_forge_tick
+'''
 import re
 import logging
 import os
@@ -8,7 +15,7 @@ from copy import deepcopy
 import networkx as nx
 import requests
 
-from all_feedstocks import get_all_feedstocks
+from .all_feedstocks import get_all_feedstocks
 
 logger = logging.getLogger(__name__)
 pin_sep_pat = re.compile(r" |>|<|=|\[")
@@ -250,12 +257,15 @@ def make_graph(names, organization, gx=None):
     return gx
 
 
-def main(args=None):
-    # get a list of all feedstocks from nsls-ii-forge
+def _make_graph_handle_args(args):
     from conda_forge_tick.utils import load_graph, dump_graph
     from conda_forge_tick.make_graph import update_nodes_with_bot_rerun
-    organization = 'nsls-ii-forge'
-    names = get_all_feedstocks(cached=False, organization=organization)
+    # get a list of all feedstocks from nsls-ii-forge
+    global DEBUG
+    DEBUG = args.debug
+    organization = args.organization
+    names = get_all_feedstocks(cached=args.cached, filepath=args.filepath,
+                               organization=organization)
     if os.path.exists("graph.json"):
         gx = load_graph()
     else:
@@ -265,7 +275,3 @@ def main(args=None):
     update_nodes_with_bot_rerun(gx)
 
     dump_graph(gx)
-
-
-if __name__ == "__main__":
-    main()
