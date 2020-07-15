@@ -14,6 +14,7 @@ from copy import deepcopy
 
 import networkx as nx
 import requests
+from shutil import copyfile
 
 from .all_feedstocks import get_all_feedstocks
 
@@ -257,6 +258,46 @@ def make_graph(names, organization, gx=None):
     return gx
 
 
+def list_dependencies_on(gx, pkg_name):
+    '''
+    Provides a list of package names that require pkg_name to be installed
+    in order to function correctly
+
+    Parameters
+    ----------
+    gx: nx.DiGraph
+        Directinal graph with nodes as packages and dependencies as edges
+    pkg_name: str
+        Name of software package
+
+    Returns
+    -------
+    list
+        List of package names that require pkg_name to be installed
+    '''
+    return list(gx.successors(pkg_name))
+
+
+def list_dependencies_of(gx, pkg_name):
+    '''
+    Provides a list of package names that pkg_name requires to be installed
+    in order to function correctly
+
+    Parameters
+    ----------
+    gx: nx.DiGraph
+        Directinal graph with nodes as packages and dependencies as edges
+    pkg_name: str
+        Name of software package
+
+    Returns
+    -------
+    list
+        List of package names that pkg_name requires to be installed
+    '''
+    return list(gx.predecessors(pkg_name))
+
+
 def _make_graph_handle_args(args):
     from conda_forge_tick.utils import load_graph, dump_graph
     from conda_forge_tick.make_graph import update_nodes_with_bot_rerun
@@ -275,3 +316,24 @@ def _make_graph_handle_args(args):
     update_nodes_with_bot_rerun(gx)
 
     dump_graph(gx)
+
+
+def _query_graph_handle_args(args):
+    from conda_forge_tick.utils import load_graph
+    if args.filepath != 'graph.json':
+        copyfile(args.filepath, 'graph.json')
+    gx = load_graph()
+    if args.query == 'depends_on':
+        dependencies = list_dependencies_on(gx, args.package)
+        print(f'The following packages require {args.package} to be installed:')
+        for dep in dependencies:
+            print(dep)
+        print(f'Total: {len(dependencies)}')
+    elif args.query == 'depends_of':
+        dependencies = list_dependencies_of(gx, args.package)
+        print(f'{args.package} requires the following packages to be installed:')
+        for dep in dependencies:
+            print(dep)
+        print(f'Total: {len(dependencies)}')
+    else:
+        print(f'Unknown query type: {args.query}')
