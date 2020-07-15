@@ -50,7 +50,7 @@ setup(
             'all-feedstocks = nsls2forge_utils.cli:all_feedstocks',
             'meta-utils = nsls2forge_utils.cli:meta_utils',
             'dashboard = nsls2forge_utils.cli:dashboard',
-            'make-graph = nsls2forge_utils.cli:make_graph',
+            'graph-utils = nsls2forge_utils.cli:graph_utils',
         ],
     },
     include_package_data=True,
