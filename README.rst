@@ -12,7 +12,7 @@ nsls2forge-utils
 nsls2forge utilities for packaging
 
 * Free software: 3-clause BSD license
-* Documentation: (COMING SOON!) https://nsls-ii-forge.github.io/nsls2forge-utils.
+* Documentation: https://nsls-ii-forge.github.io/docs/utils.html
 
 Features
 --------
