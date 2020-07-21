@@ -93,7 +93,3 @@ def download_from_source(name, organization=None, cached=False):
         f.write(contents)
         sha256_hash = hashlib.sha256(contents).hexdigest()
     return (url, sha256_hash)
-
-
-if __name__=='__main__':
-    print(get_attribute('source url', 'event-model', organization='nsls-ii-forge'))
