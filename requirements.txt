@@ -1,8 +1,8 @@
 # List required packages in this file, one per line.
-PyGithub
-requests
 beautifulsoup4
 gitpython
 markdown
 pandas
+PyGithub
+requests
 tabulate
