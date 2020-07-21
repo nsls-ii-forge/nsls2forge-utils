@@ -1,2 +1,8 @@
 # List required packages in this file, one per line.
-github3.py
+beautifulsoup4
+gitpython
+markdown
+pandas
+PyGithub
+requests
+tabulate
