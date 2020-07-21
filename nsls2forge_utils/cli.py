@@ -260,8 +260,9 @@ def graph_utils():
                              help=('Package to get information about'))
 
     info_parser.add_argument('-q', '--query', dest='query',
-                             default=None, type=str,
-                             help=('Type of query: depends_on, depends_of'))
+                             choices=['depends_on', 'depends_of'], default=None,
+                             type=str,
+                             help=('Type of information to get from the graph'))
 
     info_parser.set_defaults(func=_query_graph_handle_args)
 
