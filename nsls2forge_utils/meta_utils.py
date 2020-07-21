@@ -1,3 +1,6 @@
+import hashlib
+import os
+
 import requests
 
 from nsls2forge_utils.io import _fetch_file
@@ -6,7 +9,10 @@ from nsls2forge_utils.io import _fetch_file
 def _fetch_and_parse_meta_yaml(name, organization=None, cached=False):
     from conda_forge_tick.utils import parse_meta_yaml
     if cached:
-        with open(f'feedstocks/{name}-feedstock/recipe/meta.yaml', 'r') as f:
+        filepath = f'./{name}-feedstock/recipe/meta.yaml'
+        if not os.path.exists(filepath):
+            filepath = filepath.replace('./', 'feedstocks/', 1)
+        with open(filepath, 'r') as f:
             meta_yaml = f.read()
     else:
         if organization is None:
@@ -72,17 +78,22 @@ def download_from_source(name, organization=None, cached=False):
     Returns
     -------
     tuple[str, str]
-        Source tar.gz url and sha256 hash for downloaded file
+        Source url and sha256 hash for downloaded file
     '''
     meta_yaml = _fetch_and_parse_meta_yaml(name,
                                            organization=organization,
                                            cached=cached)
     url = meta_yaml['source']['url']
-    filename = url[url.rindex('/')+1:]
+    filename = os.path.split(url)[-1]
     response = requests.get(url, stream=True)
     if response.status_code != 200:
-        print(f'ERROR: Failed to get package from {url}: {response.status_code}')
-        return response
+        raise RuntimeError(f'Failed to get package from {url}: {response.status_code}')
     with open(filename, 'wb') as f:
-        f.write(response.raw.read())
-    return (url, meta_yaml['source']['sha256'])
+        contents = response.raw.read()
+        f.write(contents)
+        sha256_hash = hashlib.sha256(contents).hexdigest()
+    return (url, sha256_hash)
+
+
+if __name__=='__main__':
+    print(get_attribute('source url', 'event-model', organization='nsls-ii-forge'))
