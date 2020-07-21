@@ -1,13 +1,13 @@
 # These are required for developing the package (running the tests, building
 # the documentation) but not necessarily required for _using_ it.
+beautifulsoup4
 codecov
 coverage
 flake8
+lxml
+markdown
 pytest
 sphinx
-markdown
-bs4
-lxml
 # These are dependencies of various sphinx extensions for documentation.
 ipython
 matplotlib
