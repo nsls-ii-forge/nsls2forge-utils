@@ -2,8 +2,12 @@ import argparse
 import sys
 
 from .check_results import check_conda_channels, check_package_version
-from .all_feedstocks import _list_all_handle_args, _clone_all_handle_args
 from .meta_utils import get_attribute, download_from_source
+from .all_feedstocks import (
+    _list_all_handle_args,
+    _clone_all_handle_args,
+    _info_handle_args
+)
 from .dashboard import create_dashboard
 
 
@@ -122,6 +126,17 @@ def all_feedstocks():
 
     # Set function to handle arguments
     clone_parser.set_defaults(func=_clone_all_handle_args)
+
+    info_parser = subparsers.add_parser('info',
+                                        help=('Gathers and prints version and other Git '
+                                              'info about all currently cloned feedstocks'))
+
+    info_parser.add_argument('-f', '--feedstocks-dir', dest='feedstocks_dir',
+                             default='./feedstocks/', type=str,
+                             help=('Directory where cloned feedstocks are; '
+                                   'default is ./feedstocks/'))
+
+    info_parser.set_defaults(func=_info_handle_args)
 
     args = parser.parse_args()
 
