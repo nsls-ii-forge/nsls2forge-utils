@@ -1,3 +1,4 @@
+import requests
 
 
 def read_file_to_list(path):
@@ -38,3 +39,31 @@ def _write_list_to_file(contents, path, sort=False):
     with open(path, 'w') as fp:
         for item in contents:
             fp.write(f'{item}\n')
+
+
+def _fetch_file(organization, name, filepath):
+    '''
+    Fetches a file from specified GitHub organization and
+    returns the text
+
+    Parameters
+    ----------
+    organization: str
+        GitHub organization the file belongs to
+    name: str
+        Feedstock repository name belonging to organization
+    filepath: str
+        Path to requested file in feedstock repository
+    '''
+    response = requests.get(
+        "https://raw.githubusercontent.com/"
+        f"{organization}/{name}-feedstock/master/{filepath}",
+    )
+    if response.status_code != 200:
+        print(
+            f"Something odd happened when fetching recipe {name}: {response.status_code}",
+        )
+        return response
+
+    text = response.content.decode("utf-8")
+    return text
