@@ -150,6 +150,11 @@ def all_feedstocks_info(feedstocks_dir='./feedstocks/'):
     ----------
     feedstocks_dir: str, optional
         Directory where cloned feedstocks are. Default is './feedstocks/'.
+
+    Returns
+    -------
+    df: pd.DataFrame
+        Table with name, branch, changed, and version info
     '''
     all_feedstocks = get_all_feedstocks(cached=True, feedstocks_dir=feedstocks_dir)
     info = []
@@ -176,6 +181,7 @@ def all_feedstocks_info(feedstocks_dir='./feedstocks/'):
     columns = ['Name', 'Branch', 'Changed?', 'Version']
     df = pd.DataFrame(info, columns=columns)
     print(tabulate(df, headers=df.columns))
+    return df
 
 
 def _info_handle_args(args):
