@@ -12,6 +12,9 @@ def _fetch_and_parse_meta_yaml(name, organization=None, cached=False):
         filepath = f'./{name}-feedstock/recipe/meta.yaml'
         if not os.path.exists(filepath):
             filepath = filepath.replace('./', 'feedstocks/', 1)
+        if not os.path.exists(filepath):
+            raise RuntimeError(f'Cached feedstock {name} does not exist. Place '
+                               'cloned repo in ./ or ./feedstocks/ and try again.')
         with open(filepath, 'r') as f:
             meta_yaml = f.read()
     else:
