@@ -13,13 +13,13 @@ def test_all_feedstocks_from_github():
     names = get_all_feedstocks_from_github()
     assert names is None
     names = get_all_feedstocks_from_github(organization='nsls-ii-forge')
-    archived_names = get_all_feedstocks_from_github(organization='nsls-ii-forge',
-                                                    archived=True)
+    include_archived = get_all_feedstocks_from_github(organization='nsls-ii-forge',
+                                                      archived=True)
     size_names = len(names)
-    size_archived = len(archived_names)
-    assert size_archived >= size_names
+    size_include_archived = len(include_archived)
+    assert size_include_archived >= size_names
     assert size_names > 0
-    assert size_archived > 0
+    assert size_include_archived > 0
 
 
 def test_all_feedstocks():
