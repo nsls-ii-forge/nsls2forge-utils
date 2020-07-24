@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_all_feedstocks_from_github(organization=None, username=None, token=None,
-                                   archived=False):
+                                   include_archived=False):
     '''
     Gets all public feedstock repository names from the GitHub organization
     (e.g. nsls-ii-forge).
@@ -42,7 +42,7 @@ def get_all_feedstocks_from_github(organization=None, username=None, token=None,
     password: str, optional
         Password of user on GitHub for authentication.
         Uses value from ~/.netrc if not specified.
-    archived: bool, optional
+    include_archived: bool, optional
         Includes archived feedstocks in returned list
         when set to True.
 
@@ -64,7 +64,7 @@ def get_all_feedstocks_from_github(organization=None, username=None, token=None,
     try:
         repos = org.get_repos()
         for repo in repos:
-            if repo.archived and not archived:
+            if repo.archived and not include_archived:
                 continue
             name = repo.name
             if name.endswith("-feedstock"):
@@ -203,7 +203,7 @@ def _list_all_handle_args(args):
                                username=args.username,
                                token=args.token,
                                filepath=args.filepath,
-                               archived=args.archived)
+                               include_archived=args.archived)
     names = sorted(names)
     if args.write:
         _write_list_to_file(names, args.filepath, sort=False)

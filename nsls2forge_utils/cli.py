@@ -109,7 +109,7 @@ def all_feedstocks():
                              action='store_true',
                              help=('read the names of feedstocks from the cache'))
 
-    list_parser.add_argument('-a', '--archived', dest='archived',
+    list_parser.add_argument('-a', '--include-archived', dest='archived',
                              action='store_true',
                              help=('Includes archived feedstocks in returned list '
                                    'when set to True.'))
