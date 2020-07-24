@@ -13,7 +13,6 @@ from concurrent.futures import as_completed
 from copy import deepcopy
 
 import networkx as nx
-import requests
 from shutil import copyfile
 
 from .all_feedstocks import get_all_feedstocks
