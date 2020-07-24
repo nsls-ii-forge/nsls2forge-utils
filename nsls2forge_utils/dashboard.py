@@ -20,21 +20,18 @@ def create_dashboard(names=None, write_to='README.md'):
         without the -feedstock suffix
     write_to: str, optional
         filepath to markdown file to write output to
-<<<<<<< HEAD
 
     Returns
     -------
     int
         number of packages being displayed in the dashboard
-=======
->>>>>>> 0d0bdf2... created cli for dashboard and updated script
     '''
     # TODO: Azure Pipeline direct pipeline link
     # TODO: Add codecov badge if available
     main_format = dict(
-      build='[![Not Found](https://dev.azure.com/nsls2forge/nsls2forge/_apis/build/status/{name}-feedstock)]'
+      build='[![Build Status](https://dev.azure.com/nsls2forge/nsls2forge/_apis/build/status/{name}-feedstock)]'
             '(https://dev.azure.com/nsls2forge/nsls2forge/_build)',
-      health='[![Not Found](https://landscape.io/github/nsls-ii-forge/{name}-feedstock/master/'
+      health='[![Code Health](https://landscape.io/github/nsls-ii-forge/{name}-feedstock/master/'
              'landscape.svg?style=flat)](https://landscape.io/github/nsls-ii-forge/{name}-feedstock/master)',
       cf_version='[![conda-forge version](https://img.shields.io/conda/vn/conda-forge/{name})]'
                  '(https://anaconda.org/conda-forge/{name})',
