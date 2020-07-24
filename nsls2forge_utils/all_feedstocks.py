@@ -203,7 +203,7 @@ def _list_all_handle_args(args):
                                username=args.username,
                                token=args.token,
                                filepath=args.filepath,
-                               include_archived=args.archived)
+                               include_archived=args.include_archived)
     names = sorted(names)
     if args.write:
         _write_list_to_file(names, args.filepath, sort=False)
