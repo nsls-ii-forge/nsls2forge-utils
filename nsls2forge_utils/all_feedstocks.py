@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_all_feedstocks_from_github(organization=None, username=None, token=None,
-                                   archived=False):
+                                   include_archived=False):
     '''
     Gets all public feedstock repository names from the GitHub organization
     (e.g. nsls-ii-forge).
@@ -42,7 +42,7 @@ def get_all_feedstocks_from_github(organization=None, username=None, token=None,
     password: str, optional
         Password of user on GitHub for authentication.
         Uses value from ~/.netrc if not specified.
-    archived: bool, optional
+    include_archived: bool, optional
         Includes archived feedstocks in returned list
         when set to True.
 
@@ -64,7 +64,7 @@ def get_all_feedstocks_from_github(organization=None, username=None, token=None,
     try:
         repos = org.get_repos()
         for repo in repos:
-            if repo.archived and not archived:
+            if repo.archived and not include_archived:
                 continue
             name = repo.name
             if name.endswith("-feedstock"):
@@ -150,6 +150,11 @@ def all_feedstocks_info(feedstocks_dir='./feedstocks/'):
     ----------
     feedstocks_dir: str, optional
         Directory where cloned feedstocks are. Default is './feedstocks/'.
+
+    Returns
+    -------
+    df: pd.DataFrame
+        Table with name, branch, changed, and version info
     '''
     all_feedstocks = get_all_feedstocks(cached=True, feedstocks_dir=feedstocks_dir)
     info = []
@@ -176,6 +181,7 @@ def all_feedstocks_info(feedstocks_dir='./feedstocks/'):
     columns = ['Name', 'Branch', 'Changed?', 'Version']
     df = pd.DataFrame(info, columns=columns)
     print(tabulate(df, headers=df.columns))
+    return df
 
 
 def _info_handle_args(args):
@@ -197,7 +203,7 @@ def _list_all_handle_args(args):
                                username=args.username,
                                token=args.token,
                                filepath=args.filepath,
-                               archived=args.archived)
+                               include_archived=args.include_archived)
     names = sorted(names)
     if args.write:
         _write_list_to_file(names, args.filepath, sort=False)
