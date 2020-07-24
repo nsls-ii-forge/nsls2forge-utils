@@ -14,7 +14,7 @@ def test_all_feedstocks_from_github():
     assert names is None
     names = get_all_feedstocks_from_github(organization='nsls-ii-forge')
     include_archived = get_all_feedstocks_from_github(organization='nsls-ii-forge',
-                                                      archived=True)
+                                                      include_archived=True)
     size_names = len(names)
     size_include_archived = len(include_archived)
     assert size_include_archived >= size_names
