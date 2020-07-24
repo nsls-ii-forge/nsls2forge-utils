@@ -9,6 +9,11 @@ from .all_feedstocks import (
     _info_handle_args
 )
 from .dashboard import create_dashboard
+from .graph_utils import (
+    _make_graph_handle_args,
+    _query_graph_handle_args,
+    _update_handle_args
+)
 
 
 def check_results():
@@ -211,3 +216,66 @@ def dashboard():
     args = parser.parse_args()
 
     create_dashboard(names=args.names)
+
+
+def graph_utils():
+    parser = argparse.ArgumentParser(
+        description=('Create a dependency graph of feedstock packages '
+                     'or query information from an existing one'))
+
+    subparsers = parser.add_subparsers(help='sub-command help')
+
+    make_parser = subparsers.add_parser('make',
+                                        help='Create a dependency graph')
+
+    make_parser.add_argument('-o', '--organization', dest='organization',
+                             default=None, type=str,
+                             help=('GitHub organization to get recipe files from'))
+
+    make_parser.add_argument('-c', '--cached', dest='cached',
+                             action='store_true',
+                             help=('Specify if feedstock names are to be pulled from '
+                                   'a text file'))
+
+    make_parser.add_argument('-f', '--filepath', dest='filepath',
+                             default='names.txt', type=str,
+                             help=('Path to text file containing feedstock names'))
+
+    make_parser.add_argument('-d', '--debug', dest='debug',
+                             action='store_true',
+                             help=('Specify to create graph sequentially instead of in '
+                                   'parallel'))
+
+    make_parser.set_defaults(func=_make_graph_handle_args)
+
+    info_parser = subparsers.add_parser('info',
+                                        help=('Query information from existing graph'))
+
+    info_parser.add_argument('-f', '--filepath', dest='filepath',
+                             default='graph.json', type=str,
+                             help=('Path to JSON file where the graph is stored'))
+
+    info_parser.add_argument('-p', '--package', dest='package',
+                             default=None, type=str,
+                             help=('Package to get information about'))
+
+    info_parser.add_argument('-q', '--query', dest='query',
+                             choices=['depends_on', 'depends_of'], default=None,
+                             type=str,
+                             help=('Type of information to get from the graph'))
+
+    info_parser.set_defaults(func=_query_graph_handle_args)
+
+    update_parser = subparsers.add_parser('update',
+                                          help=('Update package versions in graph from '
+                                                'various sources'))
+
+    update_parser.add_argument('-f', '--filepath', dest='filepath',
+                               default='graph.json', type=str,
+                               help=('Path to JSON file where the graph is stored'))
+
+    update_parser.set_defaults(func=_update_handle_args)
+
+    args = parser.parse_args()
+
+    args.func(args)
