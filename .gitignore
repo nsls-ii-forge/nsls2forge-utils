@@ -87,6 +87,8 @@ pr_json/*
 pr_status/*
 status/*
 feedstocks/*
+versions/*
+dask-worker-space/*
 coverage.xml
 .coverage.*
 miniconda.sh
