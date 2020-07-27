@@ -246,6 +246,10 @@ def graph_utils():
                              help=('Specify to create graph sequentially instead of in '
                                    'parallel'))
 
+    make_parser.add_argument('-m', '--max-workers', dest='max_workers',
+                             default=20, type=int,
+                             help=('Maximum number of workers in process pool to build graph'))
+
     make_parser.set_defaults(func=_make_graph_handle_args)
 
     info_parser = subparsers.add_parser('info',

@@ -21,6 +21,7 @@ from .io import _fetch_file
 logger = logging.getLogger(__name__)
 pin_sep_pat = re.compile(r" |>|<|=|\[")
 
+MAX_WORKERS = 20
 NUM_GITHUB_THREADS = 2
 DEBUG = False
 
@@ -75,7 +76,7 @@ def _build_graph_process_pool(gx, names, new_names, organization):
         Name of GitHub organization containing feedstock repos.
     '''
     from conda_forge_tick.utils import executor
-    with executor("thread", max_workers=20) as pool:
+    with executor("thread", max_workers=MAX_WORKERS) as pool:
         futures = {
             pool.submit(get_attrs, name, organization): name
             for name in names
@@ -288,6 +289,8 @@ def _make_graph_handle_args(args):
     # get a list of all feedstocks from nsls-ii-forge
     global DEBUG
     DEBUG = args.debug
+    global MAX_WORKERS
+    MAX_WORKERS = args.max_workers
     organization = args.organization
     names = get_all_feedstocks(cached=args.cached, filepath=args.filepath,
                                organization=organization)
