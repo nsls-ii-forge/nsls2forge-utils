@@ -8,9 +8,11 @@ We still import some functionality from conda_forge_tick
 import logging
 import time
 import os
+import glob
+from urllib.error import URLError
+import traceback
 
 import github3
-from urllib.error import URLError
 
 from conda_forge_tick.git_utils import is_github_api_limit_reached
 from conda_forge_tick.utils import (
@@ -19,24 +21,22 @@ from conda_forge_tick.utils import (
     eval_cmd,
     dump_graph
 )
-from conda_forge_tick.contexts import MigratorSessionContext, MigratorContext
+from conda_forge_tick.contexts import (
+    MigratorContext,
+    FeedstockContext
+)
 from conda_forge_tick.migrators import (
-    Migrator,
     Version,
     PipMigrator,
     LicenseMigrator,
-    MigrationYaml,
-    Replacement,
-    ArchRebuild,
-    MatplotlibBase,
     CondaForgeYAMLCleanup,
     ExtraJinja2KeysCleanup,
     Jinja2VarsCleanup,
 )
-
 from conda_forge_tick.auto_tick import (
     initialize_migrators,
-    _compute_time_per_migrator
+    _compute_time_per_migrator,
+    run
 )
 
 logger = logging.getLogger(__name__)
@@ -44,7 +44,7 @@ logger = logging.getLogger(__name__)
 PR_LIMIT = 5
 MAX_PR_LIMIT = 50
 
-MIGRATORS: MutableSequence[Migrator] = [
+MIGRATORS = [
     Version(
         pr_limit=PR_LIMIT * 2,
         piggy_back_migrations=[
@@ -81,6 +81,8 @@ def auto_tick(**kwargs):
     github_password = env.get("PASSWORD", "")
     github_token = env.get("GITHUB_TOKEN")
     global MIGRATORS
+
+    # ISSUE HERE WITH ../conda-forge-pinning-feedstock/recipe/migrations/arch_rebuild.txt
     mctx, temp, MIGRATORS = initialize_migrators(
         github_username=github_username,
         github_password=github_password,
@@ -258,6 +260,7 @@ def auto_tick(**kwargs):
             mctx.gh.rate_limit()["resources"]["core"]["remaining"],
         )
     logger.info("Done")
+
 
 if __name__ == '__main__':
     auto_tick(dry_run=True, debug=True)
