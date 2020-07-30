@@ -44,7 +44,10 @@ install:
     rm -fv run
 
 script:
-  - coverage run -m pytest  # Run the tests and check for test coverage.
+  - | # Need to move in to ignore cf-scripts tests
+    cd ./nsls2forge_utils
+    coverage run -m pytest  # Run the tests and check for test coverage.
+    cd ..
   - chmod +x ./nsls2forge_utils/tests/test_check_results.sh  # Add permissions
   - ./nsls2forge_utils/tests/test_check_results.sh  # Run testing script
   - coverage report -m  # Generate test coverage report.

@@ -82,6 +82,7 @@ target/
 .ipynb_checkpoints
 
 node_attrs/*
+cf-scripts/*
 graph.json
 pr_json/*
 pr_status/*
