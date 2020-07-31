@@ -72,6 +72,26 @@ BOT_RERUN_LABEL = {
 
 def initialize_migrators(github_username="", github_password="", github_token=None,
                          dry_run=False):
+    '''
+    Setup graph, required contexts, and migrators
+
+    Parameters
+    ----------
+    github_username: str, optional
+        Username for bot on GitHub
+    github_password: str, optional
+        Password for bot on GitHub
+    github_token: str, optional
+        Token for bot on GitHub
+    dry_run: bool, optional
+        If true, does not submit pull requests on GitHub
+
+    Returns
+    -------
+    tuple
+        Migrator session to interact with GitHub,
+        temporary files, and list of migrators
+    '''
     temp = glob.glob("/tmp/*")
     gx = load_graph()
     smithy_version = eval_cmd("conda smithy --version").strip()
@@ -96,11 +116,20 @@ def initialize_migrators(github_username="", github_password="", github_token=No
     return ctx, temp, MIGRATORS
 
 
-def auto_tick(**kwargs):
-    # logging
+def auto_tick(dry_run=False, debug=False):
+    '''
+    Automatically update package versions and submit pull requests to
+    associated feedstocks
+
+    Parameters
+    ----------
+    dry_run: bool, optional
+        Generate version migration yamls but do not run them
+    debug: bool, optional
+        Setup logging to be in debug mode
+    '''
     from conda_forge_tick.xonsh_utils import env
 
-    debug = kwargs['debug']
     if debug:
         setup_logger(logger, level="debug")
     else:
@@ -115,7 +144,7 @@ def auto_tick(**kwargs):
     mctx, temp, MIGRATORS = initialize_migrators(
         github_username=github_username,
         github_password=github_password,
-        dry_run=kwargs['dry_run'],
+        dry_run=dry_run,
         github_token=github_token,
     )
 
@@ -211,7 +240,7 @@ def auto_tick(**kwargs):
                 try:
                     # Don't bother running if we are at zero
                     if (
-                        kwargs['dry_run']
+                        dry_run
                         or mctx.gh.rate_limit()["resources"]["core"]["remaining"] == 0
                     ):
                         break
@@ -274,7 +303,7 @@ def auto_tick(**kwargs):
                         good_prs += 1
                 finally:
                     # Write graph partially through
-                    if not kwargs['dry_run']:
+                    if not dry_run:
                         dump_graph(mctx.graph)
 
                     eval_cmd(f"rm -rf {mctx.rever_dir}/*")
@@ -283,7 +312,7 @@ def auto_tick(**kwargs):
                         if f not in temp:
                             eval_cmd(f"rm -rf {f}")
 
-    if not kwargs['dry_run']:
+    if not dry_run:
         logger.info(
             "API Calls Remaining: %d",
             mctx.gh.rate_limit()["resources"]["core"]["remaining"],
