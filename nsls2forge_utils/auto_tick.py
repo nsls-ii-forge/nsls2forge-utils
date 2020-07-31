@@ -11,6 +11,7 @@ import os
 import glob
 from urllib.error import URLError
 import traceback
+import json
 
 import github3
 
@@ -19,11 +20,13 @@ from conda_forge_tick.utils import (
     frozen_to_json_friendly,
     setup_logger,
     eval_cmd,
-    dump_graph
+    dump_graph,
+    load_graph
 )
 from conda_forge_tick.contexts import (
     MigratorContext,
-    FeedstockContext
+    FeedstockContext,
+    MigratorSessionContext
 )
 from conda_forge_tick.migrators import (
     Version,
@@ -34,7 +37,7 @@ from conda_forge_tick.migrators import (
     Jinja2VarsCleanup,
 )
 from conda_forge_tick.auto_tick import (
-    initialize_migrators,
+    migration_factory,
     _compute_time_per_migrator,
     run
 )
@@ -65,6 +68,32 @@ BOT_RERUN_LABEL = {
         "issuing a particular pull-request"
     ),
 }
+
+
+def initialize_migrators(github_username="", github_password="", github_token=None,
+                         dry_run=False):
+    temp = glob.glob("/tmp/*")
+    gx = load_graph()
+    smithy_version = eval_cmd("conda smithy --version").strip()
+    pinning_version = json.loads(eval_cmd("conda list conda-forge-pinning --json"))[0][
+        "version"
+    ]
+    migration_factory(MIGRATORS, gx)
+    for m in MIGRATORS:
+        print(f'{getattr(m, "name", m)} graph size: {len(getattr(m, "graph", []))}')
+
+    ctx = MigratorSessionContext(
+        circle_build_url=os.getenv("CIRCLE_BUILD_URL", ""),
+        graph=gx,
+        smithy_version=smithy_version,
+        pinning_version=pinning_version,
+        github_username=github_username,
+        github_password=github_password,
+        github_token=github_token,
+        dry_run=dry_run,
+    )
+
+    return ctx, temp, MIGRATORS
 
 
 def auto_tick(**kwargs):
