@@ -35,6 +35,8 @@ install:
   # Install extra requirements for running tests and building docs.
   - pip install -r requirements-dev.txt
   - conda list --show-channel-url
+  # Install specific commit of regro/cf-scripts (unreleased source code)
+  - pip install git+https://github.com/regro/cf-scripts@db87055b000e0ce9ea2fa5a82f55be0fb15613f2
 
 script:
   - coverage run -m pytest  # Run the tests and check for test coverage.

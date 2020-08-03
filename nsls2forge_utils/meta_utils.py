@@ -21,6 +21,8 @@ def _fetch_and_parse_meta_yaml(name, organization=None, cached=False):
         if organization is None:
             raise ValueError(f'No organization provided for {name}')
         meta_yaml = _fetch_file(organization, name, 'recipe/meta.yaml')
+    if isinstance(meta_yaml, requests.Response):
+        return None
     return parse_meta_yaml(meta_yaml)
 
 
@@ -57,6 +59,8 @@ def get_attribute(attribute, name, organization=None, cached=False):
     meta_yaml = _fetch_and_parse_meta_yaml(name,
                                            organization=organization,
                                            cached=cached)
+    if meta_yaml is None:
+        return None
     tags = attribute.split(' ')
     curr_attr = meta_yaml
     for tag in tags:
