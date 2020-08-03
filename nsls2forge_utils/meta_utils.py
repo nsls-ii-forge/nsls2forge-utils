@@ -60,6 +60,8 @@ def get_attribute(attribute, name, organization=None, cached=False):
     tags = attribute.split(' ')
     curr_attr = meta_yaml
     for tag in tags:
+        if tag not in curr_attr:
+            return None
         curr_attr = curr_attr[tag]
     return curr_attr
 
