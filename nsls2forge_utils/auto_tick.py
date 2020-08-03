@@ -14,8 +14,8 @@ import traceback
 import json
 
 import github3
+import networkx as nx
 
-from conda_forge_tick.git_utils import is_github_api_limit_reached
 from conda_forge_tick.utils import (
     frozen_to_json_friendly,
     setup_logger,
@@ -41,6 +41,8 @@ from conda_forge_tick.auto_tick import (
     _compute_time_per_migrator,
     run
 )
+from conda_forge_tick.status_report import write_version_migrator_status
+from conda_forge_tick.git_utils import is_github_api_limit_reached
 
 logger = logging.getLogger(__name__)
 
@@ -318,6 +320,54 @@ def auto_tick(dry_run=False, debug=False):
             mctx.gh.rate_limit()["resources"]["core"]["remaining"],
         )
     logger.info("Done")
+
+
+def status_report():
+    '''
+    Write out the status of current/recent migrations and their
+    pull requests on GitHub.
+
+    Only works for Version migrations at the moment.
+    '''
+    mctx, *_, migrators = initialize_migrators()
+    if not os.path.exists("./status"):
+        os.mkdir("./status")
+
+    for migrator in migrators:
+        if isinstance(migrator, Version):
+            write_version_migrator_status(migrator, mctx)
+
+    lst = [
+        k
+        for k, v in mctx.graph.nodes.items()
+        if len(
+            [
+                z
+                for z in v.get("payload", {}).get("PRed", [])
+                if z.get("PR", {}).get("state", "closed") == "open"
+                and z.get("data", {}).get("migrator_name", "") == "Version"
+            ],
+        )
+        >= Version.max_num_prs
+    ]
+    with open("./status/could_use_help.json", "w") as f:
+        json.dump(
+            sorted(
+                lst,
+                key=lambda z: (len(nx.descendants(mctx.graph, z)), lst),
+                reverse=True,
+            ),
+            f,
+            indent=2,
+        )
+
+
+def _run_handle_args(args):
+    auto_tick(dry_run=args.dry_run, debug=args.debug)
+
+
+def _status_handle_args(args):
+    status_report()
 
 
 if __name__ == '__main__':

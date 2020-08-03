@@ -14,6 +14,7 @@ from .graph_utils import (
     _query_graph_handle_args,
     _update_handle_args
 )
+from .auto_tick import _status_handle_args, _run_handle_args
 
 
 def check_results():
@@ -279,6 +280,34 @@ def graph_utils():
                                help=('Path to JSON file where the graph is stored'))
 
     update_parser.set_defaults(func=_update_handle_args)
+
+    args = parser.parse_args()
+
+    args.func(args)
+
+
+def auto_tick():
+    parser = argparse.ArgumentParser(
+        description=('Issues PRs if packages are out of date or need to be migrated'))
+
+    subparsers = parser.add_subparsers(help='sub-command help')
+
+    run_parser = subparsers.add_parser('run', help='Run migrations and issue PRs')
+
+    run_parser.add_argument('-d', '--debug', dest='debug',
+                            action='store_true',
+                            help=('Run migrations in debug mode (more verbose)'))
+
+    run_parser.add_argument('--dry-run', dest='dry_run',
+                            action='store_true',
+                            help=('Perform the migrations without making changes or '
+                                  'issuing PRs'))
+
+    run_parser.set_defaults(func=_run_handle_args)
+
+    status_parser = subparsers.add_parser('status', help='Get status of current migrations/PRs')
+
+    status_parser.set_defaults(func=_status_handle_args)
 
     args = parser.parse_args()
 
