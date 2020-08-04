@@ -8,26 +8,28 @@ from .all_feedstocks import get_all_feedstocks
 from .meta_utils import get_attribute
 
 
-def _extract_github_org_from_url(url):
+def _extract_github_org_and_repo_from_url(url):
     if url is not None and 'github.com' in url:
         split_str = url.rstrip('/').split('/')
         org = split_str[-2]
+        repo = split_str[-1]
         if org == 'github.com':
             org = split_str[-1]
+            repo = ''
     else:
-        return ''
-    return org
+        return '', ''
+    return org, repo
 
 
-def _extract_github_org_by_pkg(pkg):
+def _extract_github_org_and_repo(pkg):
     # get org from home url
     home_str = get_attribute('about home', pkg, 'nsls-ii-forge')
-    org = _extract_github_org_from_url(home_str)
+    org, repo = _extract_github_org_and_repo_from_url(home_str)
     # if home url failed try dev_url
     if org == '':
         dev_url = get_attribute('about dev_url', pkg, 'nsls-ii-forge')
-        org = _extract_github_org_from_url(dev_url)
-    return org
+        org, repo = _extract_github_org_and_repo_from_url(dev_url)
+    return org, repo
 
 
 def create_dashboard(names=None, write_to='README.md'):
@@ -63,8 +65,8 @@ def create_dashboard(names=None, write_to='README.md'):
       defaults_version='[![defaults version](https://img.shields.io/conda/vn/anaconda/{name})]'
                        '(https://anaconda.org/anaconda/{name})',
       pypi_version='[![PyPI version](https://img.shields.io/pypi/v/{name})](https://pypi.org/project/{name}/)',
-      github_version='[![GitHub version](https://img.shields.io/github/v/tag/{org}/{name})]'
-                     '(https://github.com/{org}/{name})',
+      github_version='[![GitHub version](https://img.shields.io/github/v/tag/{org}/{repo})]'
+                     '(https://github.com/{org}/{repo})',
       downloads='[![Downloads](https://img.shields.io/conda/dn/nsls2forge/{name})]'
                 '(https://anaconda.org/nsls2forge/{name})')
 
@@ -85,9 +87,11 @@ def create_dashboard(names=None, write_to='README.md'):
     out += header
     for pkg in pkgs:
         print(f'Formatting {pkg}...')
-        org = _extract_github_org_by_pkg(pkg)
-        tmp = row_string.format(**main_format, name=pkg, org=org)
-        out += tmp.format(name=pkg, org=org)
+        org, repo = _extract_github_org_and_repo(pkg)
+        if repo == '':
+            repo = pkg
+        tmp = row_string.format(**main_format, name=pkg, org=org, repo=repo)
+        out += tmp.format(name=pkg, org=org, repo=repo)
     with open(write_to, 'w') as f:
         f.write(out)
     return len(pkgs)
