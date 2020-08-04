@@ -4,21 +4,22 @@ https://github.com/xpdAcq/mission-control/blob/master/tools/update_readme.py
 This version was not importable so the
 functions had to be re-implemented here.
 """
+from urllib.parse import urlparse
+
 from .all_feedstocks import get_all_feedstocks
 from .meta_utils import get_attribute
 
 
 def _extract_github_org_and_repo_from_url(url):
-    if url is not None and 'github.com' in url:
-        split_str = url.rstrip('/').split('/')
-        org = split_str[-2]
-        repo = split_str[-1]
-        if org == 'github.com':
-            org = split_str[-1]
-            repo = ''
-    else:
-        return '', ''
-    return org, repo
+    url = urlparse(url)
+    if url is not None and url.netloc == 'github.com':
+        path = url.path.strip('/').split('/')
+        if len(path) == 0:
+            return '', ''
+        elif len(path) == 1:
+            path.append('')
+        return path[-2], path[-1]
+    return '', ''
 
 
 def _extract_github_org_and_repo(pkg):
