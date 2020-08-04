@@ -39,7 +39,7 @@ install:
   - pip install git+https://github.com/regro/cf-scripts@db87055b000e0ce9ea2fa5a82f55be0fb15613f2
   - |
     wget https://raw.githubusercontent.com/regro/cf-scripts/master/requirements/run
-    conda install --file run
+    conda install -c conda-forge --file run -y
     rm -rf run
 
 script:
