@@ -8,31 +8,25 @@ from .all_feedstocks import get_all_feedstocks
 from .meta_utils import get_attribute
 
 
-def _extract_org(pkg):
-    try_dev_url = False
-    # get org from home url
-    home_str = get_attribute('about home', pkg, 'nsls-ii-forge')
-    if home_str is None:
-        try_dev_url = True
-    elif 'github.com' in home_str:
-        split_str = home_str.split('/')
+def _extract_github_org_from_url(url):
+    if url is not None and 'github.com' in url:
+        split_str = url.rstrip('/').split('/')
         org = split_str[-2]
         if org == 'github.com':
             org = split_str[-1]
     else:
-        try_dev_url = True
+        return ''
+    return org
+
+
+def _extract_github_org_by_pkg(pkg):
+    # get org from home url
+    home_str = get_attribute('about home', pkg, 'nsls-ii-forge')
+    org = _extract_github_org_from_url(home_str)
     # if home url failed try dev_url
-    if try_dev_url:
+    if org == '':
         dev_url = get_attribute('about dev_url', pkg, 'nsls-ii-forge')
-        if dev_url is None:
-            return ''
-        elif 'github.com' in dev_url:
-            split_str = dev_url.split('/')
-            org = split_str[-2]
-            if org == 'github.com':
-                org = split_str[-1]
-        else:
-            return ''
+        org = _extract_github_org_from_url(dev_url)
     return org
 
 
@@ -91,8 +85,7 @@ def create_dashboard(names=None, write_to='README.md'):
     out += header
     for pkg in pkgs:
         print(f'Formatting {pkg}...')
-        org = _extract_org(pkg)
-        print(org)
+        org = _extract_github_org_by_pkg(pkg)
         tmp = row_string.format(**main_format, name=pkg, org=org)
         out += tmp.format(name=pkg, org=org)
     with open(write_to, 'w') as f:
