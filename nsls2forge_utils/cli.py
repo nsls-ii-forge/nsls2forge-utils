@@ -1,22 +1,21 @@
 import logging
 logging.captureWarnings(True)
-import argparse
-import sys
+import argparse  # noqa: E402
+import sys  # noqa: E402
 
-from .check_results import check_conda_channels, check_package_version
-from .meta_utils import get_attribute, download_from_source
-from .all_feedstocks import (
+from .check_results import check_conda_channels, check_package_version  # noqa: E402
+from .meta_utils import get_attribute, download_from_source  # noqa: E402
+from .all_feedstocks import (  # noqa: E402
     _list_all_handle_args,
     _clone_all_handle_args,
     _info_handle_args
 )
-from .dashboard import create_dashboard
-from .graph_utils import (
+from .dashboard import create_dashboard  # noqa: E402
+from .graph_utils import (  # noqa: E402
     _make_graph_handle_args,
     _query_graph_handle_args,
     _update_handle_args
 )
-from .auto_tick import _status_handle_args, _run_handle_args
 
 
 def check_results():
@@ -289,6 +288,7 @@ def graph_utils():
 
 
 def auto_tick():
+    from .auto_tick import _status_handle_args, _run_handle_args
     parser = argparse.ArgumentParser(
         description=('Issues PRs if packages are out of date or need to be migrated'))
 
