@@ -94,3 +94,5 @@ coverage.xml
 .coverage.*
 miniconda.sh
 README.md
+names.txt
+.listing

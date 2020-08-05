@@ -12,6 +12,8 @@ import glob
 from urllib.error import URLError
 import traceback
 import json
+from uuid import uuid4
+from subprocess import SubprocessError, CalledProcessError
 
 import github3
 import networkx as nx
@@ -21,7 +23,8 @@ from conda_forge_tick.utils import (
     setup_logger,
     eval_cmd,
     dump_graph,
-    load_graph
+    load_graph,
+    LazyJson
 )
 from conda_forge_tick.contexts import (
     MigratorContext,
@@ -31,6 +34,7 @@ from conda_forge_tick.contexts import (
 from conda_forge_tick.migrators import (
     Version,
     PipMigrator,
+    MigrationYaml,
     LicenseMigrator,
     CondaForgeYAMLCleanup,
     ExtraJinja2KeysCleanup,
@@ -39,10 +43,16 @@ from conda_forge_tick.migrators import (
 from conda_forge_tick.auto_tick import (
     migration_factory,
     _compute_time_per_migrator,
-    run
 )
 from conda_forge_tick.status_report import write_version_migrator_status
 from conda_forge_tick.git_utils import is_github_api_limit_reached
+from conda_forge_tick.xonsh_utils import indir, env
+from conda_forge_tick.mamba_solver import is_recipe_solvable
+
+from .git_utils import (
+    get_repo,
+    push_repo
+)
 
 logger = logging.getLogger(__name__)
 
@@ -70,6 +80,181 @@ BOT_RERUN_LABEL = {
         "issuing a particular pull-request"
     ),
 }
+
+
+def run(feedstock_ctx, migrator, protocol, pull_request,
+        rerender, fork, organization='nsls-ii-forge', **kwargs):
+    """
+    For a given feedstock and migration run the migration
+
+    Parameters
+    ----------
+    feedstock_ctx: FeedstockContext
+        The node attributes
+    migrator: Migrator instance
+        The migrator to run on the feedstock
+    protocol : str, optional
+        The git protocol to use, defaults to ``ssh``
+    pull_request : bool, optional
+        If true issue pull request, defaults to true
+    rerender : bool
+        Whether to rerender
+    fork : bool
+        If true create a fork, defaults to true
+    organization: str, optional
+        GitHub organization to get repo from
+    gh : github3.GitHub instance, optional
+        Object for communicating with GitHub, if None build from $USERNAME
+        and $PASSWORD, defaults to None
+    kwargs: dict
+        The key word arguments to pass to the migrator
+
+    Returns
+    -------
+    migrate_return: MigrationUidTypedDict
+        The migration return dict used for tracking finished migrations
+    pr_json: dict
+        The PR json object for recreating the PR as needed
+    """
+    # get the repo
+    migrator.attrs = feedstock_ctx.attrs
+
+    branch_name = migrator.remote_branch(feedstock_ctx) + "_h" + uuid4().hex[0:6]
+
+    # TODO: run this in parallel
+    feedstock_dir, repo = get_repo(
+        ctx=migrator.ctx.session,
+        fctx=feedstock_ctx,
+        branch=branch_name,
+        organization=organization,
+        feedstock=feedstock_ctx.feedstock_name,
+        protocol=protocol,
+        pull_request=pull_request,
+        fork=fork,
+
+    )
+
+    recipe_dir = os.path.join(feedstock_dir, "recipe")
+
+    # migrate the feedstock
+    migrator.run_pre_piggyback_migrations(recipe_dir, feedstock_ctx.attrs, **kwargs)
+
+    # TODO - make a commit here if the repo changed
+
+    migrate_return = migrator.migrate(recipe_dir, feedstock_ctx.attrs, **kwargs)
+
+    if not migrate_return:
+        logger.critical(
+            "Failed to migrate %s, %s",
+            feedstock_ctx.package_name,
+            feedstock_ctx.attrs.get("bad"),
+        )
+        eval_cmd(f"rm -rf {feedstock_dir}")
+        return False, False
+
+    # TODO - commit main migration here
+
+    migrator.run_post_piggyback_migrations(recipe_dir, feedstock_ctx.attrs, **kwargs)
+
+    # TODO commit post migration here
+
+    # rerender, maybe
+    diffed_files = []
+    with indir(feedstock_dir), env.swap(RAISE_SUBPROC_ERROR=False):
+        msg = migrator.commit_message(feedstock_ctx)  # noqa
+        try:
+            eval_cmd("git add --all .")
+            eval_cmd(f"git commit -am '{msg}'")
+        except CalledProcessError as e:
+            logger.info(
+                "could not commit to feedstock - "
+                "likely no changes - error is '%s'" % (repr(e)),
+            )
+        if rerender:
+            head_ref = eval_cmd("git rev-parse HEAD").strip()
+            logger.info("Rerendering the feedstock")
+
+            # In the event we can't rerender, try to update the pinnings,
+            # then bail if it does not work again
+            try:
+                eval_cmd(
+                    "conda smithy rerender -c auto --no-check-uptodate", timeout=300,
+                )
+            except SubprocessError:
+                return False, False
+
+            # If we tried to run the MigrationYaml and rerender did nothing (we only
+            # bumped the build number and dropped a yaml file in migrations) bail
+            # for instance platform specific migrations
+            gdiff = eval_cmd(f"git diff --name-only {head_ref.strip()}...HEAD")
+
+            diffed_files = [
+                _
+                for _ in gdiff.split()
+                if not (
+                    _.startswith("recipe")
+                    or _.startswith("migrators")
+                    or _.startswith("README")
+                )
+            ]
+
+    if (
+        (
+            migrator.check_solvable
+            and feedstock_ctx.attrs["conda-forge.yml"].get("bot", {}).get("automerge")
+        )
+        or feedstock_ctx.attrs["conda-forge.yml"]
+        .get("bot", {})
+        .get("check_solvable", False)
+    ) and not is_recipe_solvable(feedstock_dir):
+        eval_cmd(f"rm -rf {feedstock_dir}")
+        return False, False
+
+    if (
+        isinstance(migrator, MigrationYaml)
+        and not diffed_files
+        and feedstock_ctx.attrs["name"] != "conda-forge-pinning"
+    ):
+        # spoof this so it looks like the package is done
+        pr_json = {
+            "state": "closed",
+            "merged_at": "never issued",
+            "id": str(uuid4()),
+        }
+    else:
+        # push up
+        try:
+            pr_json = push_repo(
+                session_ctx=migrator.ctx.session,
+                fctx=feedstock_ctx,
+                feedstock_dir=feedstock_dir,
+                body=migrator.pr_body(feedstock_ctx),
+                repo=repo,
+                title=migrator.pr_title(feedstock_ctx),
+                head=f"{migrator.ctx.github_username}:{branch_name}",
+                branch=branch_name,
+                organization=organization
+            )
+
+        # This shouldn't happen too often any more since we won't double PR
+        except github3.GitHubError as e:
+            if e.msg != "Validation Failed":
+                raise
+            else:
+                print(f"Error during push {e}")
+                # If we just push to the existing PR then do nothing to the json
+                pr_json = False
+                ljpr = False
+    if pr_json:
+        ljpr = LazyJson(
+            os.path.join(migrator.ctx.session.prjson_dir, str(pr_json["id"]) + ".json"),
+        )
+        ljpr.update(**pr_json)
+    # If we've gotten this far then the node is good
+    feedstock_ctx.attrs["bad"] = False
+    logger.info("Removing feedstock dir")
+    eval_cmd(f"rm -rf {feedstock_dir}")
+    return migrate_return, ljpr
 
 
 def initialize_migrators(github_username="", github_password="", github_token=None,
@@ -137,8 +322,8 @@ def auto_tick(dry_run=False, debug=False):
     else:
         setup_logger(logger)
 
-    github_username = env.get("USERNAME", "")
-    github_password = env.get("PASSWORD", "")
+    github_username = env.get("GITHUB_USERNAME", "")
+    github_password = env.get("GITHUB_TOKEN", "")
     github_token = env.get("GITHUB_TOKEN")
     global MIGRATORS
 
