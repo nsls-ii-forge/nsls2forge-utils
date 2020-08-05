@@ -1,3 +1,5 @@
+import logging
+logging.captureWarnings(True)
 import argparse
 import sys
 
