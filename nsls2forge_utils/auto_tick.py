@@ -547,12 +547,72 @@ def status_report():
         )
 
 
+def clean(include=None, exclude=None, yes=False):
+    '''
+    Cleans the current directory for a fresh run of the
+    graph building and auto-tick process.
+
+    Parameters
+    ----------
+    include: list, optional
+        Files to be removed (default is all files required
+        by the bot except names.txt)
+    exclude: list, optional
+        Files to keep if already included either by default
+        or by user
+    yes: bool, optional
+        Automatically proceed with deletion if True
+    '''
+    to_be_removed = [
+        './dask-worker-space/*',
+        './node_attrs/*',
+        './feedstocks/*',
+        './pr_json/*',
+        './versions/*',
+        'graph.json'
+    ]
+    if include is not None:
+        to_be_removed += include
+    if exclude is not None:
+        to_be_removed = [p for p in to_be_removed if p not in exclude]
+    rm_string = '\n'.join(to_be_removed)
+    warn_msg = (
+        'WARNING: This will delete all files associated with creating the graph.\n'
+        'This includes:\n\n'
+        f'{rm_string}\n\n'
+        'If you would like to exclude some file that is included, please run:\n'
+        'auto-tick clean --exclude FILE1 FILE2\n\n'
+        'If you would like to include some file that is excluded, please run:\n'
+        'auto-tick clean --include FILE1 FILE2\n\n'
+        'NOTE: If the same file exists in both include and exclude it will NOT be removed.'
+    )
+    print(warn_msg)
+    if not yes:
+        while not yes:
+            yes_str = input('Do you wnat to continue? (y/n)\n')
+            if yes_str == 'n':
+                print('Aborting...')
+                return
+            elif yes_str == 'y':
+                yes = True
+    print('Removing files...')
+    for path in to_be_removed:
+        files = glob.glob(path)
+        for file in files:
+            os.remove(file)
+    print('Included files have been removed.')
+
+
 def _run_handle_args(args):
     auto_tick(dry_run=args.dry_run, debug=args.debug)
 
 
 def _status_handle_args(args):
     status_report()
+
+
+def _clean_handle_args(args):
+    clean(include=args.include, exclude=args.exclude, yes=args.yes)
 
 
 if __name__ == '__main__':

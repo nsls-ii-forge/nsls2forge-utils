@@ -288,7 +288,11 @@ def graph_utils():
 
 
 def auto_tick():
-    from .auto_tick import _status_handle_args, _run_handle_args
+    from .auto_tick import (
+        _status_handle_args,
+        _run_handle_args,
+        _clean_handle_args
+    )
     parser = argparse.ArgumentParser(
         description=('Issues PRs if packages are out of date or need to be migrated'))
 
@@ -310,6 +314,24 @@ def auto_tick():
     status_parser = subparsers.add_parser('status', help='Get status of current migrations/PRs')
 
     status_parser.set_defaults(func=_status_handle_args)
+
+    clean_parser = subparsers.add_parser('clean', help=('Clean current directory of files needed '
+                                                        'to run the bot'))
+
+    clean_parser.add_argument('-i', '--include', dest='include',
+                              type=str, nargs='+', default=None,
+                              help=('List of files to be removed. Default are those associated '
+                                    'with running the bot from scratch'))
+
+    clean_parser.add_argument('-e', '--exclude', dest='exclude',
+                              type=str, nargs='+', default=None,
+                              help=('Files to keep if already included either by default or by user'))
+
+    clean_parser.add_argument('-y', '--yes', dest='yes',
+                              action='store_true',
+                              help=('Skip question to proceed with removal'))
+
+    clean_parser.set_defaults(func=_clean_handle_args)
 
     args = parser.parse_args()
 
