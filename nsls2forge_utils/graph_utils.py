@@ -163,24 +163,27 @@ def make_graph(names, organization, gx=None):
     '''
     from conda_forge_tick.utils import LazyJson
     logger.info("reading graph")
-
     if gx is None:
+        print('Creating graph from scratch...')
         gx = nx.DiGraph()
-
+    else:
+        print('Updating graph with new packages...')
     new_names = [name for name in names if name not in gx.nodes]
     old_names = [name for name in names if name in gx.nodes]
     assert gx is not None
     old_names = sorted(old_names, key=lambda n: gx.nodes[n].get("time", 0))
     total_names = new_names + old_names
     logger.info("start feedstock fetch loop")
+    print('Fetching feedstock attributes...')
 
     builder = _build_graph_sequential if DEBUG else _build_graph_process_pool
     builder(gx, total_names, new_names, organization)
     logger.info("feedstock fetch loop completed")
+    print('Finished fetching feedstock attributes')
 
     gx2 = deepcopy(gx)
     logger.info("inferring nodes and edges")
-
+    print('Creating nodes and edges...')
     # make the outputs look up table so we can link properly
     outputs_lut = {
         k: node_name
@@ -223,6 +226,7 @@ def make_graph(names, organization, gx=None):
                 gx.add_node(dep, payload=lzj)
             gx.add_edge(dep, node)
     logger.info("new nodes and edges infered")
+    print('Dependency graph complete')
     return gx
 
 
@@ -239,8 +243,11 @@ def update_versions_in_graph(gx):
     from conda_forge_tick.new_update_versions import update_upstream_versions
     from conda_forge_tick.make_graph import update_nodes_with_new_versions
     os.makedirs("versions", exist_ok=True)
+    print('Fetching new versions from their sources...')
     update_upstream_versions(gx)
+    print('Updating versions in dependency graph...')
     update_nodes_with_new_versions(gx)
+    print('Finished')
 
 
 def list_dependencies_on(gx, pkg_name):
@@ -298,10 +305,11 @@ def _make_graph_handle_args(args):
         gx = load_graph()
     else:
         gx = None
+    print(f'Using {MAX_WORKERS} workers in process pool')
     gx = make_graph(names, organization, gx=gx)
     print("nodes w/o payload:", [k for k, v in gx.nodes.items() if "payload" not in v])
     update_nodes_with_bot_rerun(gx)
-
+    print('Saving graph to graph.json')
     dump_graph(gx)
 
 

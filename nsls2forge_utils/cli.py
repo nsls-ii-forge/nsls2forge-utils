@@ -250,7 +250,8 @@ def graph_utils():
 
     make_parser.add_argument('-m', '--max-workers', dest='max_workers',
                              default=20, type=int,
-                             help=('Maximum number of workers in process pool to build graph'))
+                             help=('Maximum number of workers in process pool to build graph '
+                                   '(default is 20)'))
 
     make_parser.set_defaults(func=_make_graph_handle_args)
 
@@ -308,6 +309,14 @@ def auto_tick():
                             action='store_true',
                             help=('Perform the migrations without making changes or '
                                   'issuing PRs'))
+
+    run_parser.add_argument('-f', '--fork', dest='fork',
+                            action='store_true',
+                            help=('Create fork of feedstock repositories'))
+
+    run_parser.add_argument('-o', '--organization', dest='organization',
+                            default='nsls-ii-forge', type=str,
+                            help=('GitHub organization to perform migrations on'))
 
     run_parser.set_defaults(func=_run_handle_args)
 

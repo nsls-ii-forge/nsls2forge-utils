@@ -83,7 +83,7 @@ BOT_RERUN_LABEL = {
 
 
 def run(feedstock_ctx, migrator, protocol='ssh', pull_request=True,
-        rerender=True, fork=True, organization='nsls-ii-forge', **kwargs):
+        rerender=True, fork=False, organization='nsls-ii-forge', **kwargs):
     """
     For a given feedstock and migration run the migration
 
@@ -303,7 +303,7 @@ def initialize_migrators(github_username="", github_password="", github_token=No
     return ctx, temp, MIGRATORS
 
 
-def auto_tick(dry_run=False, debug=False):
+def auto_tick(dry_run=False, debug=False, fork=False, organization='nsls-ii-forge'):
     '''
     Automatically update package versions and submit pull requests to
     associated feedstocks
@@ -327,7 +327,7 @@ def auto_tick(dry_run=False, debug=False):
     github_token = env.get("GITHUB_TOKEN")
     global MIGRATORS
 
-    # ISSUE HERE WITH ../conda-forge-pinning-feedstock/recipe/migrations/arch_rebuild.txt
+    print('Initializing migrators...')
     mctx, temp, MIGRATORS = initialize_migrators(
         github_username=github_username,
         github_password=github_password,
@@ -336,6 +336,7 @@ def auto_tick(dry_run=False, debug=False):
     )
 
     # compute the time per migrator
+    print('Computing time per migrator')
     (num_nodes, time_per_migrator, tot_time_per_migrator) = _compute_time_per_migrator(
         mctx,
     )
@@ -354,6 +355,7 @@ def auto_tick(dry_run=False, debug=False):
             time_per_migrator[i] / tot_time_per_migrator * 100,
         )
 
+    print('Performing migrations...')
     for mg_ind, migrator in enumerate(MIGRATORS):
 
         mmctx = MigratorContext(session=mctx, migrator=migrator)
@@ -437,6 +439,8 @@ def auto_tick(dry_run=False, debug=False):
                         rerender=migrator.rerender,
                         protocol="https",
                         hash_type=attrs.get("hash_type", "sha256"),
+                        fork=fork,
+                        organization=organization
                     )
                     # if migration successful
                     if migrator_uid:
@@ -514,6 +518,7 @@ def status_report():
 
     Only works for Version migrations at the moment.
     '''
+    print('Determining current status of migrations...')
     mctx, *_, migrators = initialize_migrators()
     if not os.path.exists("./status"):
         os.mkdir("./status")
@@ -545,6 +550,7 @@ def status_report():
             f,
             indent=2,
         )
+    print('Statuses have been placed in ./status')
 
 
 def clean(include=None, exclude=None, yes=False):
@@ -604,7 +610,8 @@ def clean(include=None, exclude=None, yes=False):
 
 
 def _run_handle_args(args):
-    auto_tick(dry_run=args.dry_run, debug=args.debug)
+    auto_tick(dry_run=args.dry_run, debug=args.debug, fork=args.fork,
+              organization=args.organization)
 
 
 def _status_handle_args(args):

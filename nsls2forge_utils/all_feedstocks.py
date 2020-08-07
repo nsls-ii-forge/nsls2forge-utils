@@ -109,10 +109,10 @@ def get_all_feedstocks(cached=False, filepath='names.txt',
     '''
     if cached:
         if os.path.exists(filepath):
-            logger.info(f"Reading names from cache ({filepath})")
+            print(f"Reading names from cache ({filepath})")
             names = read_file_to_list(filepath)
         elif os.path.exists(feedstocks_dir):
-            logger.info(f'Reading names from cloned repo cache ({feedstocks_dir})')
+            print(f'Reading names from cloned repo cache ({feedstocks_dir})')
             names = sorted(glob.glob(feedstocks_dir + "*-feedstock"))
             names = [n.replace('-feedstock', '').replace(feedstocks_dir, '') for n in names]
         else:
@@ -137,6 +137,7 @@ def clone_all_feedstocks(organization, feedstocks_dir):
         Path to local directory to place cloned feedstocks.
     '''
     from conda_smithy import feedstocks
+    print(f'Cloning all feedstocks from {organization}...')
     feedstocks.clone_all(gh_org=organization,
                          feedstocks_dir=feedstocks_dir)
 
@@ -160,6 +161,7 @@ def all_feedstocks_info(feedstocks_dir='./feedstocks/'):
     info = []
     for i, feedstock in enumerate(all_feedstocks):
         feedstock += '-feedstock'
+        print(f'Getting info from {feedstock}...')
         repo_path = os.path.join(feedstocks_dir, feedstock)
         # Get version info from README.md's badge via requesting the info from svg:
         try:
@@ -206,6 +208,7 @@ def _list_all_handle_args(args):
                                include_archived=args.include_archived)
     names = sorted(names)
     if args.write:
+        print(f'Writing names to {args.filepath}...')
         _write_list_to_file(names, args.filepath, sort=False)
 
     for name in names:
