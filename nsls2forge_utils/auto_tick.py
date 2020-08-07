@@ -575,6 +575,7 @@ def clean(include=None, exclude=None, yes=False):
         './feedstocks/*',
         './pr_json/*',
         './versions/*',
+        './status/*',
         'graph.json'
     ]
     if include is not None:
