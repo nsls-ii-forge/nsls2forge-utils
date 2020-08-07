@@ -20,11 +20,11 @@
 all-feedstocks list -u $GITHUB_USERNAME -t $GITHUB_TOKEN -o nsls-ii-forge -w
 # create graph with node_attrs/* and graph.json
 graph-utils make -o nsls-ii-forge -c -f names.txt -m 10
-# update graph with new versions in versions/*
+# update graph with new versions from their sources (see versions/*)
 graph-utils update
 # dry run of migrations to catch errors before PRs
 auto-tick run --dry-run
-# full run of migrations and submit PRs (pr_json/*)
+# full run of migrations and submit PRs (see pr_json/*)
 auto-tick run
 # output status of migrations to status/*
 auto-tick status
