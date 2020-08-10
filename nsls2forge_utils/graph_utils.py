@@ -240,7 +240,7 @@ def update_versions_in_graph(gx):
     gx: nx.DiGraph
         Dependency graph to be updated
     '''
-    from conda_forge_tick.new_update_versions import update_upstream_versions
+    from conda_forge_tick.update_upstream_versions import update_upstream_versions
     from conda_forge_tick.make_graph import update_nodes_with_new_versions
     os.makedirs("versions", exist_ok=True)
     print('Fetching new versions from their sources...')

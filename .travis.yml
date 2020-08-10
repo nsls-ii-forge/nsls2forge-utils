@@ -37,7 +37,7 @@ install:
   - conda list --show-channel-url
   - conda info
   # Install specific commit of regro/cf-scripts (unreleased source code)
-  - pip install git+https://github.com/regro/cf-scripts@db87055b000e0ce9ea2fa5a82f55be0fb15613f2
+  - pip install git+https://github.com/regro/cf-scripts@057274f371da27bb4b231105671f9ff7a992f35e
   - |
     wget https://raw.githubusercontent.com/regro/cf-scripts/master/requirements/run
     conda install -c conda-forge --file run -y
