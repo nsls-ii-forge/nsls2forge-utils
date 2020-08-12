@@ -149,12 +149,12 @@ def push_repo(session_ctx, fctx, feedstock_dir, body, repo, title, head, branch,
     print(f"Creating {organization} feedstock pull request...")
     if session_ctx.dry_run:
         print(f"dry run: create pr with title: {title}")
-        return False
+        return None
     else:
         pr = repo.create_pull(title, "master", head, body=body)
         if pr is None:
             print(f"Failed to create pull request for {feedstock_dir}-feedstock!")
-            return False
+            return None
         else:
             print(f"Pull request created at {pr.html_url}")
     # Return a json object so we can remake the PR if needed

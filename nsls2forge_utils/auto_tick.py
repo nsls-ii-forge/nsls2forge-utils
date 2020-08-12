@@ -335,9 +335,9 @@ def run(feedstock_ctx, migrator, protocol='ssh', pull_request=True,
             else:
                 print(f"Error during push {e}")
                 # If we just push to the existing PR then do nothing to the json
-                pr_json = False
-                ljpr = False
-    if pr_json:
+                pr_json = None
+                ljpr = None
+    if pr_json is not None:
         ljpr = LazyJson(
             os.path.join(migrator.ctx.session.prjson_dir, str(pr_json["id"]) + ".json"),
         )
@@ -546,7 +546,7 @@ def auto_tick(dry_run=False, debug=False, fork=False, organization='nsls-ii-forg
                         ]:
                             pass
                         else:
-                            if not pr_json:
+                            if pr_json is None:
                                 pr_json = {
                                     "state": "closed",
                                     "head": {"ref": "<this_is_not_a_branch>"},
