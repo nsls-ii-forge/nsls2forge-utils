@@ -87,7 +87,7 @@ def get_repo(ctx, fctx, branch, organization='nsls-ii-forge', feedstock=None,
         except github3.GitHubError:
             fork_repo = None
         if fork_repo is None or (hasattr(fork_repo, "is_null") and fork_repo.is_null()):
-            print(f"Fork of {feedstock_reponame} doesn't exist, " 
+            print(f"Fork of {feedstock_reponame} doesn't exist, "
                   f"creating feedstock fork under {ctx.github_username}...")
             repo.create_fork()
             # Sleep to make sure the fork is created before we go after it
