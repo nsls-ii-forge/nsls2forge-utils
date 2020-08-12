@@ -7,3 +7,4 @@ pandas
 PyGithub
 requests
 tabulate
+xonsh

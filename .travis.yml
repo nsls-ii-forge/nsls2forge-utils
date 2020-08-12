@@ -1,6 +1,6 @@
 language: python
 python:
-  - 3.6
+  - 3.7
 cache:
   directories:
     - $HOME/.cache/pip
@@ -35,6 +35,13 @@ install:
   # Install extra requirements for running tests and building docs.
   - pip install -r requirements-dev.txt
   - conda list --show-channel-url
+  - conda info
+  # Install specific commit of regro/cf-scripts (unreleased source code)
+  - pip install git+https://github.com/regro/cf-scripts@db87055b000e0ce9ea2fa5a82f55be0fb15613f2
+  - |
+    wget https://raw.githubusercontent.com/regro/cf-scripts/master/requirements/run
+    conda install -c conda-forge --file run -y
+    rm -fv run
 
 script:
   - coverage run -m pytest  # Run the tests and check for test coverage.

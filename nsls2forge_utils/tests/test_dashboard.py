@@ -40,6 +40,9 @@ def test_one_feedstock():
     expected_pypi = (
         'https://img.shields.io/pypi/v/event-model'
     )
+    expected_github = (
+        'https://img.shields.io/github/v/tag/bluesky/event-model'
+    )
     expected_downloads = (
         'https://img.shields.io/conda/dn/nsls2forge/event-model'
     )
@@ -57,6 +60,7 @@ def test_one_feedstock():
         nsls2 = html.find('img', attrs={'alt': 'nsls2forge version'})
         defaults = html.find('img', attrs={'alt': 'defaults version'})
         pypi = html.find('img', attrs={'alt': 'PyPI version'})
+        github = html.find('img', attrs={'alt': 'GitHub version'})
         downloads = html.find('img', attrs={'alt': 'Downloads'})
         assert num_rows == 1
         assert expected_status in str(build_status)
@@ -65,6 +69,7 @@ def test_one_feedstock():
         assert expected_nsls2 in str(nsls2)
         assert expected_default in str(defaults)
         assert expected_pypi in str(pypi)
+        assert expected_github in str(github)
         assert expected_downloads in str(downloads)
     os.remove('names.txt')
     os.remove('test.md')

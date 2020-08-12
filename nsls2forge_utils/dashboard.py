@@ -4,7 +4,33 @@ https://github.com/xpdAcq/mission-control/blob/master/tools/update_readme.py
 This version was not importable so the
 functions had to be re-implemented here.
 """
+from urllib.parse import urlparse
+
 from .all_feedstocks import get_all_feedstocks
+from .meta_utils import get_attribute
+
+
+def _extract_github_org_and_repo_from_url(url):
+    url = urlparse(url)
+    if url is not None and url.netloc == 'github.com':
+        path = url.path.strip('/').split('/')
+        if len(path) == 0:
+            return '', ''
+        elif len(path) == 1:
+            path.append('')
+        return path[-2], path[-1]
+    return '', ''
+
+
+def _extract_github_org_and_repo(pkg):
+    # get org from home url
+    home_str = get_attribute('about home', pkg, 'nsls-ii-forge')
+    org, repo = _extract_github_org_and_repo_from_url(home_str)
+    # if home url failed try dev_url
+    if org == '':
+        dev_url = get_attribute('about dev_url', pkg, 'nsls-ii-forge')
+        org, repo = _extract_github_org_and_repo_from_url(dev_url)
+    return org, repo
 
 
 def create_dashboard(names=None, write_to='README.md'):
@@ -40,16 +66,19 @@ def create_dashboard(names=None, write_to='README.md'):
       defaults_version='[![defaults version](https://img.shields.io/conda/vn/anaconda/{name})]'
                        '(https://anaconda.org/anaconda/{name})',
       pypi_version='[![PyPI version](https://img.shields.io/pypi/v/{name})](https://pypi.org/project/{name}/)',
+      github_version='[![GitHub version](https://img.shields.io/github/v/tag/{org}/{repo})]'
+                     '(https://github.com/{org}/{repo})',
       downloads='[![Downloads](https://img.shields.io/conda/dn/nsls2forge/{name})]'
                 '(https://anaconda.org/nsls2forge/{name})')
 
     row_string = ('|[{name}](https://github.com/nsls-ii-forge/{name}-feedstock)|{build} <br/> {health}'
                   '|{nsls_version} <br/> {pypi_version} <br/> {defaults_version} <br/> '
-                  '{cf_version}|{downloads}|\n')
+                  '{cf_version} <br/> {github_version}|{downloads}|\n')
     description = '''# Project Management\nReleases, Installers, Specs, and more!\n'''
     header = ('# Feedstock Packages Build Status\n\n'
               '| Repo | Build <br/> Health | nsls2forge <br/> PyPI <br/> defaults <br/> conda-forge <br/>'
-              ' Versions | Downloads|\n|:-------:|:-----------:|:---------------:|:--------------:|\n')
+              ' GitHub <br/> Versions | Downloads|\n|:-------:|'
+              ':-----------:|:---------------:|:--------------:|\n')
 
     out = description
     if names is None:
@@ -58,8 +87,12 @@ def create_dashboard(names=None, write_to='README.md'):
         pkgs = sorted(get_all_feedstocks(cached=True, filepath=names))
     out += header
     for pkg in pkgs:
-        tmp = row_string.format(**main_format, name=pkg)
-        out += tmp.format(name=pkg)
+        print(f'Formatting {pkg}...')
+        org, repo = _extract_github_org_and_repo(pkg)
+        if repo == '':
+            repo = pkg
+        tmp = row_string.format(**main_format, name=pkg, org=org, repo=repo)
+        out += tmp.format(name=pkg, org=org, repo=repo)
     with open(write_to, 'w') as f:
         f.write(out)
     return len(pkgs)
