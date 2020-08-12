@@ -10,6 +10,7 @@ import os
 import github3
 from conda_forge_tick.xonsh_utils import indir, env
 from conda_forge_tick.git_utils import feedstock_repo
+from conda_forge_tick.git_xonsh_utils import fetch_repo
 from doctr.travis import run_command_hiding_token as doctr_run
 
 
@@ -22,7 +23,7 @@ def fork_url(feedstock_url, username, organization='nsls-ii-forge'):
 
 
 def feedstock_url(fctx, organization='nsls-ii-forge', protocol="ssh"):
-    """Returns the URL for a conda-forge feedstock."""
+    """Returns the URL for a feedstock."""
     feedstock = fctx.feedstock_name + "-feedstock"
     if feedstock.startswith("http://github.com/"):
         return feedstock
@@ -32,11 +33,11 @@ def feedstock_url(fctx, organization='nsls-ii-forge', protocol="ssh"):
         return feedstock
     protocol = protocol.lower()
     if protocol == "http":
-        url = f"http://github.com/{organization}/" + feedstock + ".git"
+        url = f"http://github.com/{organization}/{feedstock}.git"
     elif protocol == "https":
-        url = f"https://github.com/{organization}/" + feedstock + ".git"
+        url = f"https://github.com/{organization}/{feedstock}.git"
     elif protocol == "ssh":
-        url = f"git@github.com:{organization}/" + feedstock + ".git"
+        url = f"git@github.com:{organization}/{feedstock}.git"
     else:
         msg = "Unrecognized github protocol {0!r}, must be ssh, http, or https."
         raise ValueError(msg.format(protocol))
@@ -44,20 +45,20 @@ def feedstock_url(fctx, organization='nsls-ii-forge', protocol="ssh"):
 
 
 def get_repo(ctx, fctx, branch, organization='nsls-ii-forge', feedstock=None,
-             protocol="ssh", pull_request=True, fork=True):
+             protocol="ssh", pull_request=True, fork=False):
     """
     Get the feedstock repo from the specified GitHub organization
 
     Parameters
     ----------
     feedstock: str, optional
-        The feedstock to clone if None use $FEEDSTOCK
+        The feedstock to clone, if None use $FEEDSTOCK
     protocol: str, optional
         The git protocol to use, defaults to ``ssh``
     pull_request: bool, optional
         If true issue pull request, defaults to true
     fork: bool
-        If true create a fork, defaults to true
+        If true create a fork, defaults to false
     gh: github3.GitHub instance, optional
         Object for communicating with GitHub, if None build from $USERNAME
         and $PASSWORD, defaults to None
@@ -86,13 +87,13 @@ def get_repo(ctx, fctx, branch, organization='nsls-ii-forge', feedstock=None,
         except github3.GitHubError:
             fork_repo = None
         if fork_repo is None or (hasattr(fork_repo, "is_null") and fork_repo.is_null()):
-            print("Fork doesn't exist creating feedstock fork...")
+            print(f"Fork of {feedstock_reponame} doesn't exist, " 
+                  f"creating feedstock fork under {ctx.github_username}...")
             repo.create_fork()
             # Sleep to make sure the fork is created before we go after it
             time.sleep(5)
 
     feedstock_dir = os.path.join(ctx.rever_dir, fctx.package_name + "-feedstock")
-    from conda_forge_tick.git_xonsh_utils import fetch_repo
 
     if fetch_repo(
         feedstock_dir=feedstock_dir, origin=origin, upstream=upstream, branch=branch,
@@ -124,9 +125,7 @@ def push_repo(session_ctx, fctx, feedstock_dir, body, repo, title, head, branch,
         # Setup push from doctr
         # Copyright (c) 2016 Aaron Meurer, Gil Forsyth
         token = session_ctx.github_password
-        deploy_repo = (
-            session_ctx.github_username + "/" + fctx.feedstock_name + "-feedstock"
-        )
+        deploy_repo = f'{session_ctx.github_username}/{fctx.feedstock_name}-feedstock'
         if session_ctx.dry_run:
             repo_url = f"https://github.com/{deploy_repo}.git"
             print(f"dry run: adding remote and pushing up branch for {repo_url}")
@@ -154,10 +153,10 @@ def push_repo(session_ctx, fctx, feedstock_dir, body, repo, title, head, branch,
     else:
         pr = repo.create_pull(title, "master", head, body=body)
         if pr is None:
-            print("Failed to create pull request!")
+            print(f"Failed to create pull request for {feedstock_dir}-feedstock!")
             return False
         else:
-            print("Pull request created at " + pr.html_url)
+            print(f"Pull request created at {pr.html_url}")
     # Return a json object so we can remake the PR if needed
     pr_dict = pr.as_dict()
     return pr_dict

@@ -98,13 +98,13 @@ def run(feedstock_ctx, migrator, protocol='ssh', pull_request=True,
     pull_request : bool, optional
         If true issue pull request, defaults to true
     rerender : bool
-        Whether to rerender
+        Whether to rerender, defaults to true
     fork : bool
-        If true create a fork, defaults to true
+        If true create a fork, defaults to false
     organization: str, optional
         GitHub organization to get repo from
     gh : github3.GitHub instance, optional
-        Object for communicating with GitHub, if None build from $USERNAME
+        Object for communicating with GitHub, if None, build from $USERNAME
         and $PASSWORD, defaults to None
     kwargs: dict
         The key word arguments to pass to the migrator
@@ -119,7 +119,7 @@ def run(feedstock_ctx, migrator, protocol='ssh', pull_request=True,
     # get the repo
     migrator.attrs = feedstock_ctx.attrs
 
-    branch_name = migrator.remote_branch(feedstock_ctx) + "_h" + uuid4().hex[0:6]
+    branch_name = migrator.remote_branch(feedstock_ctx) + "_h" + uuid4().hex[:6]
 
     # TODO: run this in parallel
     feedstock_dir, repo = get_repo(
@@ -578,10 +578,14 @@ def clean(include=None, exclude=None, yes=False):
         './status/*',
         'graph.json'
     ]
+    to_be_removed = set(to_be_removed)
     if include is not None:
-        to_be_removed += include
+        include = set(include)
+        to_be_removed = to_be_removed.union(include)
     if exclude is not None:
-        to_be_removed = [p for p in to_be_removed if p not in exclude]
+        exclude = set(exclude)
+        to_be_removed = to_be_removed.difference(exclude)
+    to_be_removed = list(to_be_removed)
     rm_string = '\n'.join(to_be_removed)
     warn_msg = (
         'WARNING: This will delete all files associated with creating the graph.\n'
@@ -596,7 +600,8 @@ def clean(include=None, exclude=None, yes=False):
     print(warn_msg)
     if not yes:
         while not yes:
-            yes_str = input('Do you wnat to continue? (y/n)\n')
+            yes_str = input('Do you want to continue? (y/n)\n')
+            yes_str = yes_str.lower()[0]
             if yes_str == 'n':
                 print('Aborting...')
                 return
@@ -624,4 +629,4 @@ def _clean_handle_args(args):
 
 
 if __name__ == '__main__':
-    auto_tick(dry_run=True, debug=True)
+    auto_tick(dry_run=True, debug=False)
