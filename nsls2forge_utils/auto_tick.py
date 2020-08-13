@@ -41,7 +41,6 @@ from conda_forge_tick.migrators import (
     Jinja2VarsCleanup,
 )
 from conda_forge_tick.auto_tick import (
-    migration_factory,
     _compute_time_per_migrator,
 )
 from conda_forge_tick.status_report import write_version_migrator_status
@@ -363,7 +362,6 @@ def initialize_migrators(github_username="", github_password="", github_token=No
     pinning_version = json.loads(eval_cmd("conda list conda-forge-pinning --json"))[0][
         "version"
     ]
-    migration_factory(MIGRATORS, gx)
     for m in MIGRATORS:
         print(f'{getattr(m, "name", m)} graph size: {len(getattr(m, "graph", []))}')
 
