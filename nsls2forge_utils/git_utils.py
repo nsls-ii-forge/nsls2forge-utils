@@ -45,7 +45,7 @@ def feedstock_url(fctx, organization='nsls-ii-forge', protocol="ssh"):
 
 
 def get_repo(ctx, fctx, branch, organization='nsls-ii-forge', feedstock=None,
-             protocol="ssh", pull_request=True, fork=False):
+             protocol="ssh", pull_request=True, fork=True):
     """
     Get the feedstock repo from the specified GitHub organization
 
@@ -70,10 +70,12 @@ def get_repo(ctx, fctx, branch, organization='nsls-ii-forge', feedstock=None,
     """
     gh = ctx.gh
     # first, let's grab the feedstock locally
-    upstream = feedstock_url(fctx=fctx, protocol=protocol)
-    origin = fork_url(upstream, ctx.github_username)
+    upstream = feedstock_url(fctx=fctx, protocol=protocol, organization=organization)
+    if fork:
+        origin = fork_url(upstream, ctx.github_username)
+    else:
+        origin = upstream
     feedstock_reponame = feedstock_repo(fctx=fctx)
-
     if pull_request or fork:
         repo = gh.repository(organization, feedstock_reponame)
         if repo is None:

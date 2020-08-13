@@ -160,7 +160,7 @@ def bot_pr_body(self, feedstock_ctx):
 
 
 def run(feedstock_ctx, migrator, protocol='ssh', pull_request=True,
-        rerender=True, fork=False, organization='nsls-ii-forge', **kwargs):
+        rerender=True, fork=True, organization='nsls-ii-forge', **kwargs):
     """
     For a given feedstock and migration run the migration
 
