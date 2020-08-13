@@ -53,6 +53,7 @@ from .git_utils import (
     get_repo,
     push_repo
 )
+from .dashboard import create_dashboard_from_list
 
 logger = logging.getLogger(__name__)
 
@@ -82,7 +83,7 @@ BOT_RERUN_LABEL = {
 }
 
 
-def bot_pr_body(self, feedstock_ctx, channel_org='nsls2forge'):
+def bot_pr_body(self, feedstock_ctx):
     '''
     Creates the body text of a version pull request
     Used to overwrite conda_forge_tick.migrators.Version.pr_body function
@@ -91,9 +92,6 @@ def bot_pr_body(self, feedstock_ctx, channel_org='nsls2forge'):
     ----------
     feedstock_ctx: FeedstockContext
         The node attributes of the current feedstock
-    channel_org: str, optional
-        Conda channel for links to other package dependency versions
-        (default nsls2forge)
 
     Returns
     -------
@@ -101,7 +99,7 @@ def bot_pr_body(self, feedstock_ctx, channel_org='nsls2forge'):
         Body text of pull request on GitHub for new version releases
     '''
     pred = [
-        (name, self.ctx.effective_graph.nodes[name]["payload"]["new_version"])
+        name
         for name in list(
             self.ctx.effective_graph.predecessors(feedstock_ctx.package_name),
         )
@@ -151,26 +149,14 @@ def bot_pr_body(self, feedstock_ctx, channel_org='nsls2forge'):
         )
     )
     # Statement here
-    template = (
-        "|{name}|{new_version}|[![Anaconda-Server Badge]"
-        "(https://img.shields.io/conda/vn/{channel_org}/{name}.svg)]"
-        "(https://anaconda.org/{channel_org}/{name})|\n"
+    curr_pkg_name = feedstock_ctx.package_name
+    pred.insert(0, curr_pkg_name)
+    body += (
+        "\n\nHere is a list of all the pending dependencies (and their "
+        "versions) for this repo. The first package is the current feedstock package. "
+        "Please double check all dependencies before merging.\n\n"
     )
-    if len(pred) > 0:
-        body += (
-            "\n\nHere is a list of all the pending dependencies (and their "
-            "versions) for this repo. "
-            "Please double check all dependencies before merging.\n\n"
-        )
-        # Only add the header row if we have content.
-        # Otherwise the rendered table in the github comment
-        # is empty which is confusing
-        body += (
-            "| Name | Upstream Version | Current Version |\n"
-            "|:----:|:----------------:|:---------------:|\n"
-        )
-    for p in pred:
-        body += template.format(name=p[0], new_version=p[1], channel_org=channel_org)
+    body += create_dashboard_from_list(pred)
     return body
 
 

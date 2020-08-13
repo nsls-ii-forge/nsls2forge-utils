@@ -33,27 +33,21 @@ def _extract_github_org_and_repo(pkg):
     return org, repo
 
 
-def create_dashboard(names=None, write_to='README.md'):
+def create_dashboard_from_list(names=[]):
     '''
-    Creates a table of packages with their build status, health, conda-forge version,
-    nsls2forge version, and number of downloads from nsls2forge.
-    Feedstocks must be from nsls-ii-forge GitHub organization.
+    Creates a table of packages with their build status, health, versions,
+    and downloads. Feedstocks must be from the nsls-ii-forge GitHub organization.
 
     Parameters
     ----------
-    names: str, optional
-        filepath to text file containing feedstock repo names
-        without the -feedstock suffix
-    write_to: str, optional
-        filepath to markdown file to write output to
+    names: list
+        List of feedstock package names to use as entries in the dashboard
 
     Returns
     -------
-    int
-        number of packages being displayed in the dashboard
+    str
+        Dashboard content in formatted string
     '''
-    # TODO: Azure Pipeline direct pipeline link
-    # TODO: Add codecov badge if available
     main_format = dict(
       build='[![Build Status](https://dev.azure.com/nsls2forge/nsls2forge/_apis/build/status/{name}-feedstock)]'
             '(https://dev.azure.com/nsls2forge/nsls2forge/_build)',
@@ -74,25 +68,48 @@ def create_dashboard(names=None, write_to='README.md'):
     row_string = ('|[{name}](https://github.com/nsls-ii-forge/{name}-feedstock)|{build} <br/> {health}'
                   '|{nsls_version} <br/> {pypi_version} <br/> {defaults_version} <br/> '
                   '{cf_version} <br/> {github_version}|{downloads}|\n')
-    description = '''# Project Management\nReleases, Installers, Specs, and more!\n'''
     header = ('# Feedstock Packages Build Status\n\n'
               '| Repo | Build <br/> Health | nsls2forge <br/> PyPI <br/> defaults <br/> conda-forge <br/>'
               ' GitHub <br/> Versions | Downloads|\n|:-------:|'
               ':-----------:|:---------------:|:--------------:|\n')
 
-    out = description
-    if names is None:
-        pkgs = sorted(get_all_feedstocks(organization='nsls-ii-forge'))
-    else:
-        pkgs = sorted(get_all_feedstocks(cached=True, filepath=names))
-    out += header
-    for pkg in pkgs:
+    dashboard = header
+    for pkg in names:
         print(f'Formatting {pkg}...')
         org, repo = _extract_github_org_and_repo(pkg)
         if repo == '':
             repo = pkg
         tmp = row_string.format(**main_format, name=pkg, org=org, repo=repo)
-        out += tmp.format(name=pkg, org=org, repo=repo)
+        dashboard += tmp.format(name=pkg, org=org, repo=repo)
+    return dashboard
+
+
+def create_dashboard(names=None, write_to='README.md'):
+    '''
+    Creates a table of packages with their build status, health, conda-forge version,
+    nsls2forge version, and number of downloads from nsls2forge.
+    Feedstocks must be from nsls-ii-forge GitHub organization.
+
+    Parameters
+    ----------
+    names: str, optional
+        filepath to text file containing feedstock repo names
+        without the -feedstock suffix
+    write_to: str, optional
+        filepath to markdown file to write output to
+
+    Returns
+    -------
+    int
+        number of packages being displayed in the dashboard
+    '''
+    description = '''# Project Management\nReleases, Installers, Specs, and more!\n'''
+    out = description
+    if names is None:
+        pkgs = sorted(get_all_feedstocks(organization='nsls-ii-forge'))
+    else:
+        pkgs = sorted(get_all_feedstocks(cached=True, filepath=names))
+    out += create_dashboard_from_list(pkgs)
     with open(write_to, 'w') as f:
         f.write(out)
     return len(pkgs)
