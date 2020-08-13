@@ -87,7 +87,8 @@ def create_dashboard_from_list(names=[]):
 def create_dashboard(names=None, write_to='README.md'):
     '''
     Creates a table of packages with their build status, health, conda-forge version,
-    nsls2forge version, and number of downloads from nsls2forge.
+    nsls2forge version, PyPI version, Anaconda version, GitHub version,
+    and number of downloads from nsls2forge conda channel.
     Feedstocks must be from nsls-ii-forge GitHub organization.
 
     Parameters
