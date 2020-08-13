@@ -51,6 +51,7 @@ setup(
             'meta-utils = nsls2forge_utils.cli:meta_utils',
             'dashboard = nsls2forge_utils.cli:dashboard',
             'graph-utils = nsls2forge_utils.cli:graph_utils',
+            'auto-tick = nsls2forge_utils.cli:auto_tick',
         ],
     },
     include_package_data=True,

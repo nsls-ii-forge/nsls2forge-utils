@@ -1,5 +1,7 @@
 # List required packages in this file, one per line.
 beautifulsoup4
+doctr
+github3.py
 gitpython
 markdown
 networkx

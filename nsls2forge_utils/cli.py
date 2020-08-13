@@ -1,15 +1,17 @@
-import argparse
-import sys
+import logging
+logging.captureWarnings(True)
+import argparse  # noqa: E402
+import sys  # noqa: E402
 
-from .check_results import check_conda_channels, check_package_version
-from .meta_utils import get_attribute, download_from_source
-from .all_feedstocks import (
+from .check_results import check_conda_channels, check_package_version  # noqa: E402
+from .meta_utils import get_attribute, download_from_source  # noqa: E402
+from .all_feedstocks import (  # noqa: E402
     _list_all_handle_args,
     _clone_all_handle_args,
     _info_handle_args
 )
-from .dashboard import create_dashboard
-from .graph_utils import (
+from .dashboard import create_dashboard  # noqa: E402
+from .graph_utils import (  # noqa: E402
     _make_graph_handle_args,
     _query_graph_handle_args,
     _update_handle_args
@@ -248,7 +250,8 @@ def graph_utils():
 
     make_parser.add_argument('-m', '--max-workers', dest='max_workers',
                              default=20, type=int,
-                             help=('Maximum number of workers in process pool to build graph'))
+                             help=('Maximum number of workers in process pool to build graph '
+                                   '(default is 20)'))
 
     make_parser.set_defaults(func=_make_graph_handle_args)
 
@@ -279,6 +282,65 @@ def graph_utils():
                                help=('Path to JSON file where the graph is stored'))
 
     update_parser.set_defaults(func=_update_handle_args)
+
+    args = parser.parse_args()
+
+    args.func(args)
+
+
+def auto_tick():
+    from .auto_tick import (
+        _status_handle_args,
+        _run_handle_args,
+        _clean_handle_args
+    )
+    parser = argparse.ArgumentParser(
+        description=('Issues PRs if packages are out of date or need to be migrated'))
+
+    subparsers = parser.add_subparsers(help='sub-command help')
+
+    run_parser = subparsers.add_parser('run', help='Run migrations and issue PRs')
+
+    run_parser.add_argument('-d', '--debug', dest='debug',
+                            action='store_true',
+                            help=('Run migrations in debug mode (more verbose)'))
+
+    run_parser.add_argument('--dry-run', dest='dry_run',
+                            action='store_true',
+                            help=('Perform the migrations without making changes or '
+                                  'issuing PRs'))
+
+    run_parser.add_argument('-f', '--fork', dest='fork',
+                            action='store_true',
+                            help=('Create fork of feedstock repositories'))
+
+    run_parser.add_argument('-o', '--organization', dest='organization',
+                            default='nsls-ii-forge', type=str,
+                            help=('GitHub organization to perform migrations on'))
+
+    run_parser.set_defaults(func=_run_handle_args)
+
+    status_parser = subparsers.add_parser('status', help='Get status of current migrations/PRs')
+
+    status_parser.set_defaults(func=_status_handle_args)
+
+    clean_parser = subparsers.add_parser('clean', help=('Clean current directory of files needed '
+                                                        'to run the bot'))
+
+    clean_parser.add_argument('-i', '--include', dest='include',
+                              type=str, nargs='+', default=None,
+                              help=('List of files to be removed. Default are those associated '
+                                    'with running the bot from scratch'))
+
+    clean_parser.add_argument('-e', '--exclude', dest='exclude',
+                              type=str, nargs='+', default=None,
+                              help=('Files to keep if already included either by default or by user'))
+
+    clean_parser.add_argument('-y', '--yes', dest='yes',
+                              action='store_true',
+                              help=('Skip question to proceed with removal'))
+
+    clean_parser.set_defaults(func=_clean_handle_args)
 
     args = parser.parse_args()
 
