@@ -310,6 +310,7 @@ def run(feedstock_ctx, migrator, protocol='ssh', pull_request=True,
                 title=migrator.pr_title(feedstock_ctx),
                 head=f"{migrator.ctx.github_username}:{branch_name}",
                 branch=branch_name,
+                fork=fork,
                 organization=organization
             )
 
@@ -327,6 +328,8 @@ def run(feedstock_ctx, migrator, protocol='ssh', pull_request=True,
             os.path.join(migrator.ctx.session.prjson_dir, str(pr_json["id"]) + ".json"),
         )
         ljpr.update(**pr_json)
+    else:
+        ljpr = None
     # If we've gotten this far then the node is good
     feedstock_ctx.attrs["bad"] = False
     logger.info("Removing feedstock dir")

@@ -106,7 +106,7 @@ def get_repo(ctx, fctx, branch, organization='nsls-ii-forge', feedstock=None,
 
 
 def push_repo(session_ctx, fctx, feedstock_dir, body, repo, title, head, branch,
-              organization='nsls-ii-forge'):
+              fork=False, organization='nsls-ii-forge'):
     """
     Push a repo up to github
 
@@ -127,7 +127,10 @@ def push_repo(session_ctx, fctx, feedstock_dir, body, repo, title, head, branch,
         # Setup push from doctr
         # Copyright (c) 2016 Aaron Meurer, Gil Forsyth
         token = session_ctx.github_password
-        deploy_repo = f'{session_ctx.github_username}/{fctx.feedstock_name}-feedstock'
+        if fork:
+            deploy_repo = f'{session_ctx.github_username}/{fctx.feedstock_name}-feedstock'
+        else:
+            deploy_repo = f'{organization}/{fctx.feedstock_name}-feedstock'
         if session_ctx.dry_run:
             repo_url = f"https://github.com/{deploy_repo}.git"
             print(f"dry run: adding remote and pushing up branch for {repo_url}")
