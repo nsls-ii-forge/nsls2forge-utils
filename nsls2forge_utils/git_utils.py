@@ -45,7 +45,7 @@ def feedstock_url(fctx, organization='nsls-ii-forge', protocol="ssh"):
 
 
 def get_repo(ctx, fctx, branch, organization='nsls-ii-forge', feedstock=None,
-             protocol="ssh", pull_request=True, fork=True):
+             protocol="ssh", pull_request=True, fork=False):
     """
     Get the feedstock repo from the specified GitHub organization
 
