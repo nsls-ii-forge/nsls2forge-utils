@@ -301,6 +301,10 @@ def run(feedstock_ctx, migrator, protocol='ssh', pull_request=True,
     else:
         # push up
         try:
+            if fork:
+                head = f"{migrator.ctx.github_username}:{branch_name}"
+            else:
+                head = f"{organization}:{branch_name}"
             pr_json = push_repo(
                 session_ctx=migrator.ctx.session,
                 fctx=feedstock_ctx,
@@ -308,7 +312,7 @@ def run(feedstock_ctx, migrator, protocol='ssh', pull_request=True,
                 body=migrator.pr_body(feedstock_ctx),
                 repo=repo,
                 title=migrator.pr_title(feedstock_ctx),
-                head=f"{migrator.ctx.github_username}:{branch_name}",
+                head=head,
                 branch=branch_name,
                 fork=fork,
                 organization=organization
@@ -320,6 +324,7 @@ def run(feedstock_ctx, migrator, protocol='ssh', pull_request=True,
                 raise
             else:
                 print(f"Error during push {e}")
+                print(f'Errors: {e.errors}')
                 # If we just push to the existing PR then do nothing to the json
                 pr_json = None
                 ljpr = None
