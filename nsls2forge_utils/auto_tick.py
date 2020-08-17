@@ -14,6 +14,7 @@ import traceback
 import json
 from uuid import uuid4
 from subprocess import SubprocessError, CalledProcessError
+import shutil
 
 import github3
 import networkx as nx
@@ -696,9 +697,12 @@ def clean(include=None, exclude=None, yes=False):
                 yes = True
     print('Removing files...')
     for path in to_be_removed:
-        files = glob.glob(path)
+        files = glob.glob(path, recursive=True)
         for file in files:
-            os.remove(file)
+            try:
+                os.remove(file)
+            except IsADirectoryError as e:
+                shutil.rmtree(file)
     print('Included files have been removed.')
 
 
