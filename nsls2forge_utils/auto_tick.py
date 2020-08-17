@@ -701,7 +701,7 @@ def clean(include=None, exclude=None, yes=False):
         for file in files:
             try:
                 os.remove(file)
-            except IsADirectoryError as e:
+            except IsADirectoryError:
                 shutil.rmtree(file)
     print('Included files have been removed.')
 
