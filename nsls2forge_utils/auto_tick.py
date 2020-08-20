@@ -699,7 +699,10 @@ def clean(include=None, exclude=None, yes=False):
     for path in to_be_removed:
         files = glob.glob(path, recursive=True)
         for file in files:
-            shutil.rmtree(file)
+            try:
+                os.remove(file)
+            except IsADirectoryError:
+                shutil.rmtree(file)
     print('Included files have been removed.')
 
 
