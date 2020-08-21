@@ -365,7 +365,6 @@ def initialize_migrators(github_username="", github_password="", github_token=No
         Migrator session to interact with GitHub,
         temporary files, and list of migrators
     '''
-    temp = glob.glob("/tmp/*")
     gx = load_graph()
     smithy_version = eval_cmd("conda smithy --version").strip()
     pinning_version = json.loads(eval_cmd("conda list conda-forge-pinning --json"))[0][
@@ -385,7 +384,7 @@ def initialize_migrators(github_username="", github_password="", github_token=No
         dry_run=dry_run,
     )
 
-    return ctx, temp, MIGRATORS
+    return ctx, MIGRATORS
 
 
 def auto_tick(dry_run=False, debug=False, fork=False, organization='nsls-ii-forge'):
@@ -416,7 +415,7 @@ def auto_tick(dry_run=False, debug=False, fork=False, organization='nsls-ii-forg
     global MIGRATORS
 
     print('Initializing migrators...')
-    mctx, temp, MIGRATORS = initialize_migrators(
+    mctx, MIGRATORS = initialize_migrators(
         github_username=github_username,
         github_password=github_password,
         dry_run=dry_run,
@@ -587,9 +586,6 @@ def auto_tick(dry_run=False, debug=False, fork=False, organization='nsls-ii-forg
 
                     eval_cmd(f"rm -rf {mctx.rever_dir}/*")
                     logger.info(os.getcwd())
-                    for f in glob.glob("/tmp/*"):
-                        if f not in temp:
-                            eval_cmd(f"rm -rf {f}")
 
     if not dry_run:
         logger.info(
