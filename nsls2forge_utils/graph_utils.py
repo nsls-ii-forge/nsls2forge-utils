@@ -235,7 +235,7 @@ def update_versions_in_graph(gx):
     Updates the version numbers for packages in the graph if new
     versions are available
     Stores result in directory ./versions/
-    
+
     Parameters
     ----------
     gx: nx.DiGraph
