@@ -186,8 +186,8 @@ def run(feedstock_ctx, migrator, protocol='ssh', pull_request=True,
     organization: str, optional
         GitHub organization to get repo from
     gh: github3.GitHub, optional
-        Object for communicating with GitHub, if None, build from $USERNAME
-        and $PASSWORD, defaults to None
+        Object for communicating with GitHub, if None, build from $GITHUB_USERNAME
+        and $GITHUB_PASSWORD, defaults to None
     kwargs: dict
         The key word arguments to pass to the migrator
 
