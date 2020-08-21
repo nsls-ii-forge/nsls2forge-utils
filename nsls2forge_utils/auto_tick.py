@@ -57,9 +57,12 @@ from .dashboard import create_dashboard_from_list
 
 logger = logging.getLogger(__name__)
 
+# change to increase PRs/run of the bot
+# NOTE: this number gets doubled for Version migrations
 PR_LIMIT = 5
 MAX_PR_LIMIT = 50
 
+# Set up types of migrators here
 MIGRATORS = [
     Version(
         pr_limit=PR_LIMIT * 2,
@@ -163,27 +166,28 @@ def bot_pr_body(self, feedstock_ctx):
 def run(feedstock_ctx, migrator, protocol='ssh', pull_request=True,
         rerender=True, fork=False, organization='nsls-ii-forge', **kwargs):
     """
-    For a given feedstock and migration run the migration
+    For a given feedstock and migration run the migration and possibly submit
+    pull request
 
     Parameters
     ----------
     feedstock_ctx: FeedstockContext
-        The node attributes
-    migrator: Migrator instance
+        The node attributes of the feedstock
+    migrator: Migrator
         The migrator to run on the feedstock
-    protocol : str, optional
+    protocol: str, optional
         The git protocol to use, defaults to ``ssh``
-    pull_request : bool, optional
+    pull_request: bool, optional
         If true issue pull request, defaults to true
-    rerender : bool
+    rerender: bool
         Whether to rerender, defaults to true
-    fork : bool
+    fork: bool
         If true create a fork, defaults to false
     organization: str, optional
         GitHub organization to get repo from
-    gh : github3.GitHub instance, optional
-        Object for communicating with GitHub, if None, build from $USERNAME
-        and $PASSWORD, defaults to None
+    gh: github3.GitHub, optional
+        Object for communicating with GitHub, if None, build from $GITHUB_USERNAME
+        and $GITHUB_PASSWORD, defaults to None
     kwargs: dict
         The key word arguments to pass to the migrator
 
@@ -362,8 +366,8 @@ def initialize_migrators(github_username="", github_password="", github_token=No
     Returns
     -------
     tuple
-        Migrator session to interact with GitHub,
-        temporary files, and list of migrators
+        Migrator session to interact with GitHub and list of migrators.
+        Currently only returns pre-defined migrators.
     '''
     gx = load_graph()
     smithy_version = eval_cmd("conda smithy --version").strip()
@@ -398,6 +402,10 @@ def auto_tick(dry_run=False, debug=False, fork=False, organization='nsls-ii-forg
         Generate version migration yamls but do not run them
     debug: bool, optional
         Setup logging to be in debug mode
+    fork: bool, optional
+        Create a fork of the repo from the organization to $GITHUB_USERNAME
+    organization: str, optional
+        GitHub organization that manages feedstock repositories
     '''
     from conda_forge_tick.xonsh_utils import env
 
@@ -409,6 +417,7 @@ def auto_tick(dry_run=False, debug=False, fork=False, organization='nsls-ii-forg
     # set Version.pr_body to custom pr_body function
     Version.pr_body = bot_pr_body
 
+    # TODO: use ~/.netrc instead
     github_username = env.get("GITHUB_USERNAME", "")
     github_password = env.get("GITHUB_TOKEN", "")
     github_token = env.get("GITHUB_TOKEN")

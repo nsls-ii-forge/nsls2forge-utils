@@ -15,7 +15,19 @@ from doctr.travis import run_command_hiding_token as doctr_run
 
 
 def fork_url(feedstock_url, username, organization='nsls-ii-forge'):
-    """Creates the URL of the user's fork."""
+    '''
+    Replaces organization in GitHub URL with the username for a feedstock
+
+    Parameters
+    ----------
+    feedstock_url: str
+        URL of the feedstock repository on GitHub
+    username: str
+        GitHub user to replace organization in URL
+    organization: str, optional
+        GitHub organization to replace in URL. Default is
+        nsls-ii-forge.
+    '''
     beg, end = feedstock_url.rsplit("/", 1)
     beg = beg[:-len(organization)]  # chop off organization
     url = beg + username + "/" + end
@@ -23,7 +35,24 @@ def fork_url(feedstock_url, username, organization='nsls-ii-forge'):
 
 
 def feedstock_url(fctx, organization='nsls-ii-forge', protocol="ssh"):
-    """Returns the URL for a feedstock."""
+    '''
+    Returns the URL for a feedstock repository on GitHub
+
+    Parameters
+    ----------
+    fctx: FeedstockContext
+        Node attributes of feedstock in dependency graph
+    organization: str, optional
+        GitHub organization to place in URL. Default is
+        nsls-ii-forge
+    protocol: str, optional
+        The git protocol to use in the URL. Default is ssh.
+
+    Returns
+    -------
+    url: str
+        Git URL to feedstock repository on GitHub
+    '''
     feedstock = fctx.feedstock_name + "-feedstock"
     if feedstock.startswith("http://github.com/"):
         return feedstock
@@ -51,22 +80,27 @@ def get_repo(ctx, fctx, branch, organization='nsls-ii-forge', feedstock=None,
 
     Parameters
     ----------
+    ctx: MigratorSessionContext
+        Context for GitHub interaction/authentication
+    fctx: FeedstockContext
+        Attributes of the feedstock from the dependency graph
+    branch: str
+        Remote branch name to use
+    organization: str, optional
+        GitHub organization to get repository from
     feedstock: str, optional
         The feedstock to clone, if None use $FEEDSTOCK
     protocol: str, optional
         The git protocol to use, defaults to ``ssh``
     pull_request: bool, optional
         If true issue pull request, defaults to true
-    fork: bool
+    fork: bool, optional
         If true create a fork, defaults to false
-    gh: github3.GitHub instance, optional
-        Object for communicating with GitHub, if None build from $USERNAME
-        and $PASSWORD, defaults to None
 
     Returns
     -------
-    recipe_dir : str
-        The recipe directory
+    tuple
+        Feedstock directory and Repository object for the feedstock
     """
     gh = ctx.gh
     # first, let's grab the feedstock locally
@@ -108,14 +142,30 @@ def get_repo(ctx, fctx, branch, organization='nsls-ii-forge', feedstock=None,
 def push_repo(session_ctx, fctx, feedstock_dir, body, repo, title, head, branch,
               fork=False, organization='nsls-ii-forge'):
     """
-    Push a repo up to github
+    Push a repository up to GitHub
 
     Parameters
     ----------
-    feedstock_dir : str
+    session_ctx: MigratorSessionContext
+        Context for GitHub interaction/authentication
+    fctx: FeedstockContext
+        Attributes of the feedstock from the dependency graph
+    feedstock_dir: str
         The feedstock directory
-    body : str
+    body: str
         The PR body
+    repo: github3.Repository
+        Object for GitHub API call
+    title: str
+        The PR title
+    head: str
+        Head branch name and user/org (ex. 'nsls-ii-forge:v1.0.1_h58425')
+    branch: str
+        The branch name (same one in head)
+    fork: bool, optional
+        Change deploy repository if fork was made. Default is False.
+    organization: str, optional
+        GitHub organization to deploy changes to. Default is nsls-ii-forge.
 
     Returns
     -------

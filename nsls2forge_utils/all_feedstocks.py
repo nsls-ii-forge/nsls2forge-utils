@@ -97,6 +97,8 @@ def get_all_feedstocks(cached=False, filepath='names.txt',
         Specified if client wants to take repository names from names.txt.
     filepath: str, optional
         Path to file to read from if cached = True. Default value is 'names.txt'.
+    feedstocks_dir: str, optional
+        Second place to try if cached = True. Default value is './feedstocks/'.
     kwargs: dict, optional
         Organization, username and token should be specified here for authentication
         if cached = False.
@@ -214,16 +216,3 @@ def _list_all_handle_args(args):
     for name in names:
         print(name)
     print(f'Total feedstocks: {len(names)}')
-
-
-def main(args=None):
-    # TODO: move organization to global CONFIG file
-    organization = 'nsls-ii-forge'
-    names = get_all_feedstocks(cached=False, organization=organization)
-    # write each repository name to a file
-    _write_list_to_file(names, 'names.txt', sort=True)
-    clone_all_feedstocks(organization, './feedstocks')
-
-
-if __name__ == "__main__":
-    main()
