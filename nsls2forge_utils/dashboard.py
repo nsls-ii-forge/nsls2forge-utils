@@ -12,7 +12,7 @@ from .meta_utils import get_attribute
 
 def _extract_github_org_and_repo_from_url(url):
     url = urlparse(url)
-    if url is not None and url.netloc == 'github.com':
+    if url is not None and 'github.com' in url.netloc:
         path = url.path.strip('/').split('/')
         if len(path) == 0:
             return '', ''
