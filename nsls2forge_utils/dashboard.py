@@ -12,7 +12,7 @@ from .meta_utils import get_attribute
 
 def _extract_github_org_and_repo_from_url(url):
     url = urlparse(url)
-    if url is not None and 'github.com' in url.netloc:
+    if url and 'github.com' in url.netloc:
         path = url.path.strip('/').split('/')
         if len(path) == 0:
             return '', ''
@@ -22,13 +22,13 @@ def _extract_github_org_and_repo_from_url(url):
     return '', ''
 
 
-def _extract_github_org_and_repo(pkg):
+def _extract_github_org_and_repo(pkg, feedstock_org='nsls-ii-forge'):
     # get org from home url
-    home_str = get_attribute('about home', pkg, 'nsls-ii-forge')
+    home_str = get_attribute('about home', pkg, feedstock_org)
     org, repo = _extract_github_org_and_repo_from_url(home_str)
     # if home url failed try dev_url
     if org == '':
-        dev_url = get_attribute('about dev_url', pkg, 'nsls-ii-forge')
+        dev_url = get_attribute('about dev_url', pkg, feedstock_org)
         org, repo = _extract_github_org_and_repo_from_url(dev_url)
     return org, repo
 
