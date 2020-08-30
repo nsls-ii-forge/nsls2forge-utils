@@ -4,22 +4,24 @@ https://github.com/xpdAcq/mission-control/blob/master/tools/update_readme.py
 This version was not importable so the
 functions had to be re-implemented here.
 """
-from urllib.parse import urlparse
+from urllib.parse import urlparse, ParseResult, ParseResultBytes
 
 from .all_feedstocks import get_all_feedstocks
 from .meta_utils import get_attribute
 
 
 def _extract_github_org_and_repo_from_url(url):
-    url = urlparse(url)
-    if url and 'github.com' in url.netloc:
-        path = url.path.strip('/').split('/')
+    url_obj = urlparse(url)
+    if isinstance(url_obj, ParseResultBytes):
+        url_obj = url_obj.decode()
+    if url and 'github.com' in url_obj.netloc:
+        path = url_obj.path.strip('/').split('/')
         if len(path) == 0:
             return '', ''
         elif len(path) == 1:
             path.append('')
         return path[-2], path[-1]
-    return '', ''
+    return ('', '')
 
 
 def _extract_github_org_and_repo(pkg, feedstock_org='nsls-ii-forge'):
