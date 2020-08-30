@@ -4,7 +4,7 @@ https://github.com/xpdAcq/mission-control/blob/master/tools/update_readme.py
 This version was not importable so the
 functions had to be re-implemented here.
 """
-from urllib.parse import urlparse, ParseResult, ParseResultBytes
+from urllib.parse import urlparse, ParseResultBytes
 
 from .all_feedstocks import get_all_feedstocks
 from .meta_utils import get_attribute

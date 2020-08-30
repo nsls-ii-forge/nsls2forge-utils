@@ -1,6 +1,5 @@
 import pytest
 
-from nsls2forge_utils.meta_utils import get_attribute
 from nsls2forge_utils.dashboard import (_extract_github_org_and_repo,
                                         _extract_github_org_and_repo_from_url)
 
