@@ -67,21 +67,22 @@ def create_dashboard_from_list(names=[]):
       downloads='[![Downloads](https://img.shields.io/conda/dn/nsls2forge/{name})]'
                 '(https://anaconda.org/nsls2forge/{name})')
 
-    row_string = ('|[{name}](https://github.com/nsls-ii-forge/{name}-feedstock)|{build} <br/> {health}'
+    row_string = ('|{index}|[{name}](https://github.com/nsls-ii-forge/{name}-feedstock)|{build} <br/> {health}'
                   '|{nsls_version} <br/> {pypi_version} <br/> {defaults_version} <br/> '
                   '{cf_version} <br/> {github_version}|{downloads}|\n')
     header = ('# Feedstock Packages Build Status\n\n'
-              '| Repo | Build <br/> Health | nsls2forge <br/> PyPI <br/> defaults <br/> conda-forge <br/>'
-              ' GitHub <br/> Versions | Downloads|\n|:-------:|'
+              '| # | Repo | Build <br/> Health | nsls2forge <br/> PyPI <br/> defaults <br/> conda-forge <br/>'
+              ' GitHub <br/> Versions | Downloads|\n|:---:|:-------:|'
               ':-----------:|:---------------:|:--------------:|\n')
 
     dashboard = header
-    for pkg in names:
+    for i, pkg in enumerate(names):
         print(f'Formatting {pkg}...')
         org, repo = _extract_github_org_and_repo(pkg)
         if repo == '':
             repo = pkg
-        tmp = row_string.format(**main_format, name=pkg, org=org, repo=repo)
+        tmp = row_string.format(**main_format, index=(i+1), name=pkg,
+                                org=org, repo=repo)
         dashboard += tmp.format(name=pkg, org=org, repo=repo)
     return dashboard
 
