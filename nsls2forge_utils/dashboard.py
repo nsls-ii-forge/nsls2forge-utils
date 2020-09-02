@@ -73,7 +73,7 @@ def create_dashboard_from_list(names=[]):
     header = ('# Feedstock Packages Build Status\n\n'
               '| # | Repo | Build <br/> Health | nsls2forge <br/> PyPI <br/> defaults <br/> conda-forge <br/>'
               ' GitHub <br/> Versions | Downloads|\n|:---:|:-------:|'
-              ':-----------:|:---------------:|:--------------:|\n')
+              ':-----------:|---------------:|:--------------:|\n')
 
     dashboard = header
     for i, pkg in enumerate(names):
