@@ -1,0 +1,240 @@
+https://github.com/conda-forge/aiocontextvars-feedstock
+https://github.com/conda-forge/aiomysql-feedstock
+https://github.com/conda-forge/aiosqlite-feedstock
+https://github.com/conda-forge/amostra-feedstock
+no feedstock exists
+https://github.com/conda-forge/ansiwrap-feedstock
+https://github.com/conda-forge/anyio-feedstock
+https://github.com/conda-forge/arabic_reshaper-feedstock
+https://github.com/conda-forge/area-detector-handlers-feedstock
+https://github.com/conda-forge/argh-feedstock
+no feedstock exists
+https://github.com/conda-forge/arvpyf-feedstock
+https://github.com/conda-forge/asdf-feedstock
+https://github.com/conda-forge/asks-feedstock
+https://github.com/conda-forge/asteval-feedstock
+https://github.com/conda-forge/atsas-pipelines-feedstock
+no feedstock exists
+https://github.com/conda-forge/bibtexparser-feedstock
+https://github.com/conda-forge/bloptools-feedstock
+https://github.com/conda-forge/bluesky-feedstock
+https://github.com/conda-forge/bluesky-darkframes-feedstock
+https://github.com/conda-forge/bluesky-kafka-feedstock
+https://github.com/conda-forge/bluesky-live-feedstock
+https://github.com/conda-forge/boltons-feedstock
+https://github.com/conda-forge/bumps-feedstock
+https://github.com/conda-forge/cachey-feedstock
+https://github.com/conda-forge/caproto-feedstock
+https://github.com/conda-forge/chxtools-feedstock
+no feedstock exists
+no feedstock exists
+https://github.com/conda-forge/conda-pack-feedstock
+https://github.com/conda-forge/contexter-feedstock
+https://github.com/conda-forge/cpplint-feedstock
+no feedstock exists
+https://github.com/conda-forge/curio-feedstock
+https://github.com/conda-forge/dask-jobqueue-feedstock
+https://github.com/conda-forge/databases-feedstock
+https://github.com/conda-forge/databroker-feedstock
+https://github.com/conda-forge/databroker-pack-feedstock
+https://github.com/conda-forge/delocate-feedstock
+https://github.com/conda-forge/distro-feedstock
+https://github.com/conda-forge/doct-feedstock
+https://github.com/conda-forge/doctr-feedstock
+https://github.com/conda-forge/doi2bib-feedstock
+https://github.com/conda-forge/dpkt-feedstock
+https://github.com/conda-forge/dxchange-feedstock
+https://github.com/conda-forge/dxfile-feedstock
+https://github.com/conda-forge/edffile-feedstock
+no feedstock exists
+https://github.com/conda-forge/eiger-io-feedstock
+https://github.com/conda-forge/epics-base-feedstock
+https://github.com/conda-forge/event-model-feedstock
+https://github.com/conda-forge/eventlet-feedstock
+https://github.com/conda-forge/extension-helpers-feedstock
+https://github.com/conda-forge/fabio-feedstock
+https://github.com/conda-forge/file-feedstock
+https://github.com/conda-forge/fire-feedstock
+https://github.com/conda-forge/freetype-py-feedstock
+https://github.com/conda-forge/frozendict-feedstock
+https://github.com/conda-forge/github3.py-feedstock
+https://github.com/conda-forge/globus-sdk-feedstock
+https://github.com/conda-forge/grid-strategy-feedstock
+https://github.com/conda-forge/gwcs-feedstock
+https://github.com/conda-forge/h11-feedstock
+https://github.com/conda-forge/hdf5-external-filter-plugins-feedstock
+no feedstock exists
+https://github.com/conda-forge/helpdev-feedstock
+https://github.com/conda-forge/historydict-feedstock
+https://github.com/conda-forge/hkl-feedstock
+https://github.com/conda-forge/hklpy-feedstock
+https://github.com/conda-forge/httpcore-feedstock
+https://github.com/conda-forge/httpie-feedstock
+https://github.com/conda-forge/httpx-feedstock
+https://github.com/conda-forge/hunter-feedstock
+no feedstock exists
+no feedstock exists
+https://github.com/conda-forge/icu-feedstock
+https://github.com/conda-forge/igor-feedstock
+https://github.com/conda-forge/intake-feedstock
+https://github.com/conda-forge/intake-xarray-feedstock
+https://github.com/conda-forge/ipympl-feedstock
+https://github.com/conda-forge/ipywidgets-feedstock
+https://github.com/conda-forge/ispyb-feedstock
+https://github.com/conda-forge/isstools-feedstock
+https://github.com/conda-forge/itk-feedstock
+https://github.com/conda-forge/jansson-feedstock
+https://github.com/conda-forge/jwcrypto-feedstock
+https://github.com/conda-forge/kafka-python-feedstock
+https://github.com/conda-forge/kazoo-feedstock
+https://github.com/conda-forge/legacy-suitcase-feedstock
+https://github.com/conda-forge/libgfortran-feedstock
+https://github.com/conda-forge/libjpeg-turbo-feedstock
+https://github.com/conda-forge/librdkafka-feedstock
+https://github.com/conda-forge/libsass-feedstock
+https://github.com/conda-forge/lixtools-feedstock
+https://github.com/conda-forge/lmfit-feedstock
+no feedstock exists
+https://github.com/conda-forge/logging_tree-feedstock
+https://github.com/conda-forge/make-feedstock
+https://github.com/conda-forge/manhole-feedstock
+https://github.com/conda-forge/mendeleev-feedstock
+https://github.com/conda-forge/modestimage-feedstock
+https://github.com/conda-forge/mongoquery-feedstock
+https://github.com/conda-forge/mpi-feedstock
+https://github.com/conda-forge/mpi4py-feedstock
+https://github.com/conda-forge/multio-feedstock
+https://github.com/conda-forge/n2snusertools-feedstock
+https://github.com/conda-forge/napari-feedstock
+https://github.com/conda-forge/napari-plugin-engine-feedstock
+https://github.com/conda-forge/napari-svg-feedstock
+https://github.com/conda-forge/nbclient-feedstock
+https://github.com/conda-forge/nest-asyncio-feedstock
+https://github.com/conda-forge/netifaces-feedstock
+https://github.com/conda-forge/nexpy-feedstock
+https://github.com/conda-forge/nexusformat-feedstock
+no feedstock exists
+https://github.com/conda-forge/nsls2-detector-handlers-feedstock
+no feedstock exists
+no feedstock exists
+https://github.com/conda-forge/numconv-feedstock
+https://github.com/conda-forge/oct2py-feedstock
+https://github.com/conda-forge/octave_kernel-feedstock
+no feedstock exists
+no feedstock exists
+no feedstock exists
+no feedstock exists
+no feedstock exists
+https://github.com/conda-forge/overly-feedstock
+https://github.com/conda-forge/papermill-feedstock
+https://github.com/conda-forge/parsimonious-feedstock
+https://github.com/conda-forge/pdfstream-feedstock
+https://github.com/conda-forge/peakutils-feedstock
+https://github.com/conda-forge/pep517-feedstock
+https://github.com/conda-forge/periodictable-feedstock
+https://github.com/conda-forge/photutils-feedstock
+https://github.com/conda-forge/pint-feedstock
+https://github.com/conda-forge/pip-tools-feedstock
+no feedstock exists
+https://github.com/conda-forge/prettytable-feedstock
+https://github.com/conda-forge/punx-feedstock
+https://github.com/conda-forge/py4xs-feedstock
+https://github.com/conda-forge/pycentroids-feedstock
+https://github.com/conda-forge/pychx-feedstock
+https://github.com/conda-forge/pyepics-feedstock
+https://github.com/conda-forge/pyfai-feedstock
+https://github.com/conda-forge/pyfftw-feedstock
+https://github.com/conda-forge/pyfiglet-feedstock
+https://github.com/conda-forge/pygithub-feedstock
+https://github.com/conda-forge/pygobject-feedstock
+https://github.com/conda-forge/pyinstrument-feedstock
+https://github.com/conda-forge/pyinstrument_cext-feedstock
+https://github.com/conda-forge/pyisemail-feedstock
+no feedstock exists
+https://github.com/conda-forge/pylatexenc-feedstock
+https://github.com/conda-forge/pymysql-feedstock
+https://github.com/conda-forge/pynacl-feedstock
+no feedstock exists
+https://github.com/conda-forge/pypdf2-feedstock
+https://github.com/conda-forge/pyresttable-feedstock
+no feedstock exists
+https://github.com/conda-forge/pystackreg-feedstock
+https://github.com/conda-forge/pytest-faulthandler-feedstock
+https://github.com/conda-forge/pytest-qt-feedstock
+https://github.com/conda-forge/python-barcode-feedstock
+https://github.com/conda-forge/python-bidi-feedstock
+https://github.com/conda-forge/python-confluent-kafka-feedstock
+https://github.com/conda-forge/python-gssapi-feedstock
+https://github.com/conda-forge/pyxdameraulevenshtein-feedstock
+https://github.com/conda-forge/pyxrf-feedstock
+https://github.com/conda-forge/pyzbar-feedstock
+https://github.com/conda-forge/qdarkstyle-feedstock
+https://github.com/conda-forge/qrcode-feedstock
+https://github.com/conda-forge/qt5reactor-feedstock
+https://github.com/conda-forge/qtmodern-feedstock
+https://github.com/conda-forge/qtsass-feedstock
+no feedstock exists
+https://github.com/conda-forge/rapidz-feedstock
+https://github.com/conda-forge/recordwhat-feedstock
+https://github.com/conda-forge/reportlab-feedstock
+https://github.com/conda-forge/rixs-feedstock
+https://github.com/conda-forge/sansio-multipart-feedstock
+https://github.com/conda-forge/sasmodels-feedstock
+https://github.com/conda-forge/sasview-feedstock
+https://github.com/conda-forge/scikit-beam-feedstock
+https://github.com/conda-forge/scikit-build-feedstock
+https://github.com/conda-forge/semantic_version-feedstock
+https://github.com/conda-forge/shadow3-feedstock
+https://github.com/conda-forge/shed-feedstock
+https://github.com/conda-forge/signalslot-feedstock
+https://github.com/conda-forge/silx-feedstock
+https://github.com/conda-forge/simple-pid-feedstock
+https://github.com/conda-forge/sirepo-bluesky-feedstock
+https://github.com/conda-forge/sixtools-feedstock
+https://github.com/conda-forge/slack-sdk-feedstock
+https://github.com/conda-forge/sniffio-feedstock
+https://github.com/conda-forge/spefile-feedstock
+no feedstock exists
+https://github.com/conda-forge/srwpy-feedstock
+https://github.com/conda-forge/suitcase-csv-feedstock
+https://github.com/conda-forge/suitcase-json-metadata-feedstock
+https://github.com/conda-forge/suitcase-jsonl-feedstock
+https://github.com/conda-forge/suitcase-mongo-feedstock
+https://github.com/conda-forge/suitcase-msgpack-feedstock
+https://github.com/conda-forge/suitcase-specfile-feedstock
+https://github.com/conda-forge/suitcase-tiff-feedstock
+https://github.com/conda-forge/suitcase-utils-feedstock
+https://github.com/conda-forge/super_state_machine-feedstock
+https://github.com/conda-forge/tenacity-feedstock
+https://github.com/conda-forge/textwrap3-feedstock
+https://github.com/conda-forge/tomopy-feedstock
+https://github.com/conda-forge/tomviz-feedstock
+https://github.com/conda-forge/trio-feedstock
+https://github.com/conda-forge/uncertainties-feedstock
+https://github.com/conda-forge/unyt-feedstock
+https://github.com/conda-forge/uritemplate.py-feedstock
+https://github.com/conda-forge/uwsgi-feedstock
+https://github.com/conda-forge/vispy-feedstock
+https://github.com/conda-forge/weakrefmethod-feedstock
+https://github.com/conda-forge/wxmplot-feedstock
+https://github.com/conda-forge/wxutils-feedstock
+https://github.com/conda-forge/xas-feedstock
+https://github.com/conda-forge/xhtml2pdf-feedstock
+no feedstock exists
+no feedstock exists
+no feedstock exists
+no feedstock exists
+https://github.com/conda-forge/xonsh-feedstock
+https://github.com/conda-forge/xpdacq-feedstock
+https://github.com/conda-forge/xpdan-feedstock
+https://github.com/conda-forge/xpdconf-feedstock
+https://github.com/conda-forge/xpdsim-feedstock
+https://github.com/conda-forge/xpdtools-feedstock
+https://github.com/conda-forge/xpdview-feedstock
+https://github.com/conda-forge/xray-vision-feedstock
+https://github.com/conda-forge/xraydb-feedstock
+no feedstock exists
+https://github.com/conda-forge/xraylib-feedstock
+https://github.com/conda-forge/xrt-feedstock
+https://github.com/conda-forge/yapsy-feedstock
+https://github.com/conda-forge/zbar-feedstock
