@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import yaml
 from bs4 import BeautifulSoup
 import requests
@@ -11,18 +10,16 @@ warnings.filterwarnings("ignore", category=UserWarning)
 def get_versions(namedata, URLv, set):
 
     for i in range(len(namedata)):
-        link = URLv + namedata[i].strip()
+        link = f"{URLv}{namedata[i].strip()}"
         html = BeautifulSoup(link, features="lxml")
         p = html.findAll("p")
-        type(p)
-        len(p)
         p0 = p[0]
-        r = requests.get(p0.text, timeout=100)
+        r = requests.get(p0.text, timeout=120)  # 120 seconds/2 minutes timeout
         svg = BeautifulSoup(r.text, features="lxml")
         version_tag = svg.findAll("text")[-1]
 
         if set == "conda":
-            datadict["package" + str(i)] = {
+            datadict[f"package{i}"] = {
                 "package_name": namedata[i].strip(),
                 "conda_version": version_tag.text,
                 "nsls2_version": 0,
@@ -30,14 +27,14 @@ def get_versions(namedata, URLv, set):
                 "anaconda_URL": 0,
             }
         else:
-            datadict["package" + str(i)]["nsls2_version"] = version_tag.text
+            datadict[f"package{i}"]["nsls2_version"] = version_tag.text
 
 
 def get_urls(namedata, URLn, type):
 
     for i in range(len(namedata)):
         if type == "feedstock":
-            link = URLn + namedata[i].strip() + "-feedstock"
+            link = f"{URLn}{namedata[i].strip()}-feedstock"
             print1 = "no feedstock exists"
             response = requests.get(link)
             if response:
@@ -60,8 +57,8 @@ feedstockURL = "https://github.com/conda-forge/"
 anacondaURL = "https://anaconda.org/conda-forge/"
 
 namedata = []
-repos = open("names.txt", "r")
-namedata = repos.readlines()
+with open("names.txt", "r") as repos:
+    namedata = repos.readlines()
 
 datadict = {}  # data dictionary
 

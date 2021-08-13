@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import yaml
 from openpyxl import Workbook
 from openpyxl.styles import PatternFill
@@ -32,7 +31,7 @@ with open("xldata.yml", "r") as package_data, open(
 
 for i in range(2, len(data) + 2):
     cellref = ws.cell(row=i, column=1)
-    cellref.value = readinfo["package" + str(i - 2)]["package_name"]
+    cellref.value = readinfo[f"package{i-2}"]["package_name"]
 
     cellref = ws.cell(row=i, column=2)
     cellref.value = readinfo["package" + str(i - 2)]["conda_version"]
