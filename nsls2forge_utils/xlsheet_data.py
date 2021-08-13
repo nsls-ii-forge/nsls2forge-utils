@@ -22,33 +22,33 @@ def get_versions(namedata, URLv, set):
             datadict[f"package{i}"] = {
                 "package_name": namedata[i].strip(),
                 "conda_version": version_tag.text,
-                "nsls2_version": 0,
-                "feedstock_URL": 0,
-                "anaconda_URL": 0,
+                "nsls2_version": None,
+                "feedstock_URL": None,
+                "anaconda_URL": None,
             }
         else:
             datadict[f"package{i}"]["nsls2_version"] = version_tag.text
 
 
-def get_urls(namedata, URLn, type):
+def get_urls(namedata, URLn, set):
 
     for i in range(len(namedata)):
-        if type == "feedstock":
+        if set == "feedstock":
             link = f"{URLn}{namedata[i].strip()}-feedstock"
             print1 = "no feedstock exists"
             response = requests.get(link)
             if response:
-                datadict["package" + str(i)]["feedstock_URL"] = link
+                datadict[f"package{i}"]["feedstock_URL"] = link
             else:
-                datadict["package" + str(i)]["feedstock_URL"] = print1
+                datadict[f"package{i}"]["feedstock_URL"] = print1
         else:
             link = URLn + namedata[i].strip()
             print1 = "no anaconda package exists"
             response = requests.head(link)
-            if response.status_code > 302:
-                datadict["package" + str(i)]["anaconda_URL"] = link
+            if response.status_code > 302: # 302 is the webcode for a pakcage that does not exist in anaconda.org
+                datadict[f"package{i}"]["anaconda_URL"] = link
             else:
-                datadict["package" + str(i)]["anaconda_URL"] = print1
+                datadict[f"package{i}"]["anaconda_URL"] = print1
 
 
 condaURLv = "https://img.shields.io/conda/vn/conda-forge/"
